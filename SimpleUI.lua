@@ -19,6 +19,8 @@ function SimpleUI.new()
     self.gui = nil
     self.tabs = {}
     self.currentTab = nil
+    self.isMinimized = false
+    self.floatingButton = nil
     return self
 end
 
@@ -98,6 +100,27 @@ function SimpleUI:CreateMainGui(title)
         screenGui:Destroy()
     end)
     
+    -- Minimize button
+    local minimizeButton = Instance.new("TextButton")
+    minimizeButton.Name = "MinimizeButton"
+    minimizeButton.Size = UDim2.new(0, 30, 0, 30)
+    minimizeButton.Position = UDim2.new(1, -70, 0, 5)
+    minimizeButton.BackgroundColor3 = Color3.fromRGB(255, 165, 0)
+    minimizeButton.Text = "−"
+    minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    minimizeButton.TextSize = 18
+    minimizeButton.Font = Enum.Font.GothamBold
+    minimizeButton.BorderSizePixel = 0
+    minimizeButton.Parent = titleBar
+    
+    local minimizeCorner = Instance.new("UICorner")
+    minimizeCorner.CornerRadius = UDim.new(0, 4)
+    minimizeCorner.Parent = minimizeButton
+    
+    minimizeButton.MouseButton1Click:Connect(function()
+        self:ToggleMinimize()
+    end)
+    
     -- Tab container
     local tabContainer = Instance.new("Frame")
     tabContainer.Name = "TabContainer"
@@ -140,30 +163,55 @@ function SimpleUI:CreateMainGui(title)
     
     contentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateCanvasSize)
     
-    -- Make draggable
+    -- Make draggable (Fixed version)
     local dragging = false
     local dragStart = nil
     local startPos = nil
     
-    titleBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    local function inputBegan(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
+            startPos = mainFrame.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end
+    
+    local function inputChanged(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            if dragging then
+                local delta = input.Position - dragStart
+                mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+        end
+    end
+    
+    titleBar.InputBegan:Connect(inputBegan)
+    UserInputService.InputChanged:Connect(inputChanged)
+    
+    -- Alternative dragging for mobile/touch
+    titleBar.TouchTap:Connect(function(touchPositions, gameProcessedEvent)
+        if not gameProcessedEvent then
+            dragging = true
+            dragStart = touchPositions[1]
             startPos = mainFrame.Position
         end
     end)
     
-    titleBar.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStart
+    titleBar.TouchMoved:Connect(function(touch, gameProcessedEvent)
+        if dragging and not gameProcessedEvent then
+            local delta = touch.Position - dragStart
             mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
     
-    titleBar.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
+    titleBar.TouchEnded:Connect(function(touch, gameProcessedEvent)
+        dragging = false
     end)
     
     self.gui = screenGui
@@ -522,6 +570,123 @@ function SimpleUI:AddDropdown(tab, text, options, callback)
     end)
     
     return dropdown
+end
+
+-- Minimize/Maximize Functions
+function SimpleUI:CreateFloatingButton()
+    -- Remove existing floating button
+    if self.floatingButton then
+        self.floatingButton:Destroy()
+    end
+    
+    local floatingButton = Instance.new("TextButton")
+    floatingButton.Name = "FloatingButton"
+    floatingButton.Size = UDim2.new(0, 60, 0, 60)
+    floatingButton.Position = UDim2.new(0, 10, 0.5, -30)
+    floatingButton.BackgroundColor3 = Color3.fromRGB(60, 120, 200)
+    floatingButton.Text = "🎣"
+    floatingButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    floatingButton.TextSize = 20
+    floatingButton.Font = Enum.Font.GothamBold
+    floatingButton.BorderSizePixel = 0
+    floatingButton.Parent = self.gui
+    
+    local floatingCorner = Instance.new("UICorner")
+    floatingCorner.CornerRadius = UDim.new(0, 30)
+    floatingCorner.Parent = floatingButton
+    
+    -- Add shadow effect
+    local shadow = Instance.new("Frame")
+    shadow.Name = "Shadow"
+    shadow.Size = UDim2.new(1, 4, 1, 4)
+    shadow.Position = UDim2.new(0, -2, 0, -2)
+    shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    shadow.BackgroundTransparency = 0.8
+    shadow.BorderSizePixel = 0
+    shadow.ZIndex = floatingButton.ZIndex - 1
+    shadow.Parent = floatingButton
+    
+    local shadowCorner = Instance.new("UICorner")
+    shadowCorner.CornerRadius = UDim.new(0, 30)
+    shadowCorner.Parent = shadow
+    
+    -- Make floating button draggable
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
+    
+    floatingButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = floatingButton.Position
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            floatingButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+    
+    -- Click to restore
+    floatingButton.MouseButton1Click:Connect(function()
+        if not dragging then
+            self:ToggleMinimize()
+        end
+    end)
+    
+    -- Hover effects
+    floatingButton.MouseEnter:Connect(function()
+        TweenService:Create(floatingButton, TweenInfo.new(0.2), {
+            Size = UDim2.new(0, 65, 0, 65),
+            BackgroundColor3 = Color3.fromRGB(80, 140, 220)
+        }):Play()
+    end)
+    
+    floatingButton.MouseLeave:Connect(function()
+        TweenService:Create(floatingButton, TweenInfo.new(0.2), {
+            Size = UDim2.new(0, 60, 0, 60),
+            BackgroundColor3 = Color3.fromRGB(60, 120, 200)
+        }):Play()
+    end)
+    
+    self.floatingButton = floatingButton
+    return floatingButton
+end
+
+function SimpleUI:ToggleMinimize()
+    if self.isMinimized then
+        -- Restore
+        self.mainFrame.Visible = true
+        if self.floatingButton then
+            self.floatingButton:Destroy()
+            self.floatingButton = nil
+        end
+        self.isMinimized = false
+        
+        -- Animate restoration
+        TweenService:Create(self.mainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+            Size = UDim2.new(0, 500, 0, 400)
+        }):Play()
+    else
+        -- Minimize
+        TweenService:Create(self.mainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+            Size = UDim2.new(0, 0, 0, 0)
+        }):Play()
+        
+        wait(0.3)
+        self.mainFrame.Visible = false
+        self:CreateFloatingButton()
+        self.isMinimized = true
+    end
 end
 
 return SimpleUI
