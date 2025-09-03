@@ -105,39 +105,91 @@ if CheckFunc(loadfile) then
 else
     library = loadstring(game:HttpGet(kavoUrl))()
 end
-local Automation = library:CreateWindow('Automation')
-local Modifications = library:CreateWindow('Modifications')
-local Teleports = library:CreateWindow('Teleports')
-local Visuals = library:CreateWindow('Visuals')
-Automation:Section('Autofarm')
-Automation:Toggle('Freeze Character', {location = flags, flag = 'freezechar'})
-Automation:Dropdown('Freeze Character Mode', {location = flags, flag = 'freezecharmode', list = {'Rod Equipped', 'Toggled'}})
-Automation:Toggle('Auto Cast', {location = flags, flag = 'autocast'})
-Automation:Toggle('Auto Shake', {location = flags, flag = 'autoshake'})
-Automation:Toggle('Auto Reel', {location = flags, flag = 'autoreel'})
------
+
+-- Create Kavo UI Window
+local Window = library.CreateLib("🎣 Fisch Script", "Ocean")
+
+-- Create Tabs
+local AutoTab = Window:NewTab("🎣 Automation")
+local ModTab = Window:NewTab("⚙️ Modifications")
+local TeleTab = Window:NewTab("🌍 Teleports")
+local VisualTab = Window:NewTab("👁️ Visuals")
+
+-- Automation Section
+local AutoSection = AutoTab:NewSection("Autofarm")
+AutoSection:NewToggle("Freeze Character", "Freeze your character in place", function(state)
+    flags['freezechar'] = state
+end)
+AutoSection:NewDropdown("Freeze Character Mode", "Select freeze mode", {"Rod Equipped", "Toggled"}, function(currentOption)
+    flags['freezecharmode'] = currentOption
+end)
+AutoSection:NewToggle("Auto Cast", "Automatically cast fishing rod", function(state)
+    flags['autocast'] = state
+end)
+AutoSection:NewToggle("Auto Shake", "Automatically shake when fish bites", function(state)
+    flags['autoshake'] = state
+end)
+AutoSection:NewToggle("Auto Reel", "Automatically reel in fish", function(state)
+    flags['autoreel'] = state
+end)
+
+-- Modifications Section
 if CheckFunc(hookmetamethod) then
-    Modifications:Section('Hooks')
-    Modifications:Toggle('No AFK Text', {location = flags, flag = 'noafk'})
-    Modifications:Toggle('Perfect Cast', {location = flags, flag = 'perfectcast'})
-    Modifications:Toggle('Always Catch', {location = flags, flag = 'alwayscatch'})
+    local HookSection = ModTab:NewSection("Hooks")
+    HookSection:NewToggle("No AFK Text", "Remove AFK notifications", function(state)
+        flags['noafk'] = state
+    end)
+    HookSection:NewToggle("Perfect Cast", "Always get perfect cast", function(state)
+        flags['perfectcast'] = state
+    end)
+    HookSection:NewToggle("Always Catch", "Always catch fish", function(state)
+        flags['alwayscatch'] = state
+    end)
 end
-Modifications:Section('Client')
-Modifications:Toggle('Infinite Oxygen', {location = flags, flag = 'infoxygen'})
-Modifications:Toggle('No Temp & Oxygen', {location = flags, flag = 'nopeakssystems'})
------
-Teleports:Section('Locations')
-Teleports:Dropdown('Zones', {location = flags, flag = 'zones', list = ZoneNames})
-Teleports:Button('Teleport To Zone', function() gethrp().CFrame = TeleportLocations['Zones'][flags['zones']] end)
-Teleports:Dropdown('Rod Locations', {location = flags, flag = 'rodlocations', list = RodNames})
-Teleports:Button('Teleport To Rod', function() gethrp().CFrame = TeleportLocations['Rods'][flags['rodlocations']] end)
------
-Visuals:Section('Rod')
-Visuals:Toggle('Body Rod Chams', {location = flags, flag = 'bodyrodchams'})
-Visuals:Toggle('Rod Chams', {location = flags, flag = 'rodchams'})
-Visuals:Dropdown('Material', {location = flags, flag = 'rodmaterial', list = {'ForceField', 'Neon'}})
-Visuals:Section('Fish Abundance')
-Visuals:Toggle('Free Fish Radar', {location = flags, flag = 'fishabundance'})
+
+local ClientSection = ModTab:NewSection("Client")
+ClientSection:NewToggle("Infinite Oxygen", "Never run out of oxygen", function(state)
+    flags['infoxygen'] = state
+end)
+ClientSection:NewToggle("No Temp & Oxygen", "Disable temperature and oxygen systems", function(state)
+    flags['nopeakssystems'] = state
+end)
+
+-- Teleports Section
+local LocationSection = TeleTab:NewSection("Locations")
+LocationSection:NewDropdown("Select Zone", "Choose a zone to teleport to", ZoneNames, function(currentOption)
+    flags['zones'] = currentOption
+end)
+LocationSection:NewButton("Teleport To Zone", "Teleport to selected zone", function()
+    if flags['zones'] then
+        gethrp().CFrame = TeleportLocations['Zones'][flags['zones']]
+    end
+end)
+LocationSection:NewDropdown("Rod Locations", "Choose a rod location", RodNames, function(currentOption)
+    flags['rodlocations'] = currentOption
+end)
+LocationSection:NewButton("Teleport To Rod", "Teleport to selected rod location", function()
+    if flags['rodlocations'] then
+        gethrp().CFrame = TeleportLocations['Rods'][flags['rodlocations']]
+    end
+end)
+
+-- Visuals Section
+local RodSection = VisualTab:NewSection("Rod")
+RodSection:NewToggle("Body Rod Chams", "Apply chams to body rod", function(state)
+    flags['bodyrodchams'] = state
+end)
+RodSection:NewToggle("Rod Chams", "Apply chams to equipped rod", function(state)
+    flags['rodchams'] = state
+end)
+RodSection:NewDropdown("Material", "Select rod material", {"ForceField", "Neon"}, function(currentOption)
+    flags['rodmaterial'] = currentOption
+end)
+
+local FishSection = VisualTab:NewSection("Fish Abundance")
+FishSection:NewToggle("Free Fish Radar", "Show fish abundance zones", function(state)
+    flags['fishabundance'] = state
+end)
 
 --// Loops
 RunService.Heartbeat:Connect(function()
