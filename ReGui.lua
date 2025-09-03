@@ -515,9 +515,4 @@ function ReGui.Window(config)
     return window
 end
 
--- Initialize ReGui
-function ReGui.Init()
-    print("ReGui initialized successfully")
-end
-
 return ReGui
