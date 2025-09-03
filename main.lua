@@ -314,32 +314,136 @@ end
 
 --// UI
 local ReGui
-if CheckFunc(makefolder) and (CheckFunc(isfolder) and not isfolder('fisch')) then
-    makefolder('fisch')
+local function loadReGui()
+    local success, result = pcall(function()
+        if CheckFunc(makefolder) and (CheckFunc(isfolder) and not isfolder('fisch')) then
+            makefolder('fisch')
+        end
+        
+        if CheckFunc(writefile) and CheckFunc(isfile) and not isfile('fisch/ReGui.lua') then
+            local httpSuccess, httpResult = pcall(function()
+                return game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/refs/heads/main/ReGui.lua')
+            end)
+            
+            if httpSuccess and httpResult and httpResult ~= "" then
+                writefile('fisch/ReGui.lua', httpResult)
+                print("ReGui.lua downloaded and cached successfully")
+            else
+                warn("Failed to download ReGui.lua:", httpResult)
+            end
+        end
+        
+        -- Try to load from file first
+        if CheckFunc(loadfile) and isfile('fisch/ReGui.lua') then
+            local loadedReGui = loadfile('fisch/ReGui.lua')()
+            if type(loadedReGui) == "table" and loadedReGui.Init then
+                return loadedReGui
+            else
+                error("Invalid ReGui object loaded from file")
+            end
+        else
+            -- Fallback to direct HTTP loading
+            local httpSuccess, httpResult = pcall(function()
+                return game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/refs/heads/main/ReGui.lua')
+            end)
+            
+            if httpSuccess and httpResult and httpResult ~= "" then
+                local loadedReGui = loadstring(httpResult)()
+                if type(loadedReGui) == "table" and loadedReGui.Init then
+                    return loadedReGui
+                else
+                    error("Invalid ReGui object loaded from HTTP")
+                end
+            else
+                error("Failed to load ReGui from HTTP: " .. tostring(httpResult))
+            end
+        end
+    end)
+    
+    if success and result and type(result) == "table" then
+        return result
+    else
+        error("Failed to load ReGui: " .. tostring(result))
+    end
 end
-if CheckFunc(writefile) and (CheckFunc(isfile) and not isfile('fisch/ReGui.lua')) then
-    writefile('fisch/ReGui.lua', game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/refs/heads/main/ReGui.lua'))
-end
-if CheckFunc(loadfile) then
-    ReGui = loadfile('fisch/ReGui.lua')()
+
+-- Load ReGui with error handling
+local loadSuccess, loadResult = pcall(loadReGui)
+if loadSuccess and loadResult and type(loadResult) == "table" then
+    ReGui = loadResult
+    print("ReGui loaded successfully")
 else
-    ReGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/refs/heads/main/ReGui.lua'))()
+    error("Critical error loading ReGui: " .. tostring(loadResult))
 end
 
--- Initialize ReGui
-ReGui:Init()
+-- Validate ReGui object before initialization
+if not ReGui or type(ReGui) ~= "table" then
+    error("ReGui is not a valid table object")
+end
 
--- Create main window
-local MainWindow = ReGui:Window({
-    Title = 'FISCH Script',
-    Size = UDim2.fromOffset(400, 500)
-})
+if not ReGui.Init or type(ReGui.Init) ~= "function" then
+    error("ReGui.Init is not a valid function")
+end
 
--- Create tabs
-local AutomationTab = MainWindow:CreateTab({Name = 'Automation'})
-local ModificationsTab = MainWindow:CreateTab({Name = 'Modifications'})
-local TeleportsTab = MainWindow:CreateTab({Name = 'Teleports'})
-local VisualsTab = MainWindow:CreateTab({Name = 'Visuals'})
+-- Initialize ReGui with error handling
+local initSuccess, initError = pcall(function()
+    return ReGui:Init()
+end)
+
+if not initSuccess then
+    error("Failed to initialize ReGui: " .. tostring(initError))
+end
+
+-- Validate ReGui after initialization
+if not ReGui.Window or type(ReGui.Window) ~= "function" then
+    error("ReGui.Window is not available after initialization")
+end
+
+-- Create main window with error handling
+local windowSuccess, MainWindow = pcall(function()
+    return ReGui:Window({
+        Title = 'FISCH Script',
+        Size = UDim2.fromOffset(400, 500)
+    })
+end)
+
+if not windowSuccess or not MainWindow then
+    error("Failed to create main window: " .. tostring(MainWindow))
+end
+
+-- Validate MainWindow object
+if not MainWindow or type(MainWindow) ~= "table" then
+    error("MainWindow is not a valid object")
+end
+
+if not MainWindow.CreateTab or type(MainWindow.CreateTab) ~= "function" then
+    error("MainWindow.CreateTab is not available")
+end
+
+-- Create tabs with error handling
+local tabSuccess, tabs = pcall(function()
+    local AutomationTab = MainWindow:CreateTab({Name = 'Automation'})
+    local ModificationsTab = MainWindow:CreateTab({Name = 'Modifications'})
+    local TeleportsTab = MainWindow:CreateTab({Name = 'Teleports'})
+    local VisualsTab = MainWindow:CreateTab({Name = 'Visuals'})
+    
+    return {
+        Automation = AutomationTab,
+        Modifications = ModificationsTab,
+        Teleports = TeleportsTab,
+        Visuals = VisualsTab
+    }
+end)
+
+if not tabSuccess or not tabs then
+    error("Failed to create tabs: " .. tostring(tabs))
+end
+
+-- Extract tabs for easier access
+local AutomationTab = tabs.Automation
+local ModificationsTab = tabs.Modifications
+local TeleportsTab = tabs.Teleports
+local VisualsTab = tabs.Visuals
 
 -- Automation Section
 AutomationTab:CollapsingHeader({Title = 'Autofarm'})
