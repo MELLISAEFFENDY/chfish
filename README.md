@@ -18,7 +18,12 @@ A comprehensive automation script for the FISCH game on Roblox with enhanced GUI
 loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/loader.lua'))()
 ```
 
-### Method 2: Main Script
+### Method 2: Alternative Simple Loader (If Method 1 Fails)
+```lua
+loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/simple-loader.lua'))()
+```
+
+### Method 3: Main Script (Direct)
 ```lua
 loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/main.lua'))()
 ```
@@ -84,11 +89,30 @@ loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish
 
 ## 🔧 Troubleshooting
 
-If you encounter loading issues:
+### Common Errors and Solutions
+
+#### "Failed to initialize ReGui" or "attempt to index nil with 'Prefabs'"
+**Solution:**
+1. Try the alternative simple loader:
+   ```lua
+   loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/simple-loader.lua'))()
+   ```
+2. Ensure the game is fully loaded before running the script
+3. Wait a few seconds and try again
+
+#### "LoadScript errors"
+**Solution:**
 1. Ensure your executor supports HTTP requests
 2. Check if file system functions are available
 3. Verify game is fully loaded before running script
 4. Try the loader method if direct loading fails
+
+#### "Script not working"
+**Solution:**
+1. Make sure you're in the FISCH game
+2. Check if your executor is up to date
+3. Try different loading methods (loader → simple-loader → main script)
+4. Restart your executor and try again
 
 ## 📞 Support
 
