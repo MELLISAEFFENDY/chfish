@@ -318,12 +318,12 @@ if CheckFunc(makefolder) and (CheckFunc(isfolder) and not isfolder('fisch')) the
     makefolder('fisch')
 end
 if CheckFunc(writefile) and (CheckFunc(isfile) and not isfile('fisch/ReGui.lua')) then
-    writefile('fisch/ReGui.lua', game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/gamech/refs/heads/main/ReGui.lua'))
+    writefile('fisch/ReGui.lua', game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/refs/heads/main/ReGui.lua'))
 end
 if CheckFunc(loadfile) then
     ReGui = loadfile('fisch/ReGui.lua')()
 else
-    ReGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/gamech/refs/heads/main/ReGui.lua'))()
+    ReGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/refs/heads/main/ReGui.lua'))()
 end
 
 -- Initialize ReGui
