@@ -1,32 +1,50 @@
-# 🎣 FISCH Script
+# 🎣 FISCH Script v2.0
 
-A comprehensive automation script for the FISCH game on Roblox with enhanced GUI and robust error handling.
+A comprehensive automation script for the FISCH game on Roblox with **brand new Simple UI** and enhanced compatibility.
 
-## ✨ Features
+## ✨ New Features (v2.0)
+
+- 🎨 **Custom Simple UI** - Built with native Roblox components for maximum compatibility
+- 🚀 **No External Dependencies** - No more ReGui issues or loading problems
+- 📱 **User-Friendly Interface** - Clean, modern, and intuitive design
+- 🎯 **Tabbed Organization** - Automation, Teleports, Modifications, and Credits
+- 🔄 **Smooth Animations** - Professional look with TweenService animations
+- 🖱️ **Draggable Windows** - Move the GUI anywhere on your screen
+- ⚙️ **Responsive Design** - Auto-resizing and scroll support
+
+## 🎮 Core Features
 
 - **Auto Fishing** - Automated fishing with customizable settings
-- **Teleportation** - Quick travel to all zones and rod locations
-- **Fish Abundance Detection** - Visual indicators for fish locations
-- **GUI Interface** - Clean and intuitive ReGui interface
-- **Error Handling** - Robust script loading with fallback mechanisms
-- **Safe Loading** - Cached file system with HTTP fallback
+- **Smart Teleportation** - Quick travel to all zones and rod locations  
+- **Character Controls** - Freeze, speed modification, jump power
+- **Fish Abundance ESP** - Visual indicators for fish locations
+- **Time Controls** - Change time of day (Dawn, Day, Dusk, Night)
+- **Quality of Life** - Infinite oxygen, auto shake, auto reel
 
-## 🚀 Quick Start
+## 🚀 Quick Start (New UI)
 
-### Method 1: Direct Loader (Recommended)
+### Method 1: Main Loader (Recommended) ⭐
 ```lua
 loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/loader.lua'))()
 ```
 
-### Method 2: Alternative Simple Loader (If Method 1 Fails)
+### Method 2: Direct Simple UI Script
+```lua
+loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/new-main.lua'))()
+```
+
+### Method 3: Fallback Simple Loader
 ```lua
 loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/simple-loader.lua'))()
 ```
 
-### Method 3: Main Script (Direct)
-```lua
-loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/main.lua'))()
-```
+## 🖼️ UI Preview
+
+The new interface features:
+- **🤖 Automation Tab**: Auto fishing, character freeze, infinite oxygen
+- **📍 Teleport Tab**: One-click teleports to all zones and rod locations
+- **⚙️ Modifications Tab**: Speed controls, ESP, time settings
+- **👨‍💻 Credits Tab**: Developer info and script management
 
 ## 📍 Supported Locations
 
@@ -67,19 +85,21 @@ loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish
 
 ## 🛠️ Technical Features
 
-- **Enhanced Service Validation** - Ensures all game services are properly loaded
-- **Fallback Loading System** - Multiple methods to load required modules
-- **Error Recovery** - Comprehensive error handling and reporting
-- **Memory Optimization** - Efficient script caching and loading
-- **Cross-Executor Support** - Works with various Roblox executors
+- **Native Roblox Components** - Uses built-in GUI elements for stability
+- **Zero External Dependencies** - No more ReGui loading issues
+- **Enhanced Compatibility** - Works with all major Roblox executors
+- **Memory Optimized** - Efficient performance with smooth animations
+- **Error Recovery** - Comprehensive error handling and fallback systems
+- **Cross-Platform Support** - Compatible with Windows, Mac, and Mobile executors
 
-## 📝 Recent Updates
+## 📝 Recent Updates (v2.0)
 
-- Fixed loadscript errors with enhanced error handling
-- Updated GitHub raw links to correct repository
-- Added service validation and initialization
-- Improved ReGui loading with fallback mechanisms
-- Enhanced function checking with pcall protection
+- 🎨 **Complete UI Overhaul** - New SimpleUI system replaces problematic ReGui
+- 🚀 **Enhanced Stability** - No more "Failed to initialize" errors
+- 📱 **Better UX** - More intuitive and user-friendly interface
+- 🔧 **Improved Compatibility** - Works across all executors without issues
+- ⚡ **Faster Loading** - Reduced dependencies and optimized code
+- 🎯 **Better Organization** - Clean tabbed interface for easy navigation
 
 ## ⚠️ Requirements
 
@@ -89,30 +109,37 @@ loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish
 
 ## 🔧 Troubleshooting
 
-### Common Errors and Solutions
+### ✅ Version 2.0 Fixes Common Issues
 
-#### "Failed to initialize ReGui" or "attempt to index nil with 'Prefabs'"
-**Solution:**
-1. Try the alternative simple loader:
+The new SimpleUI system resolves most previous issues:
+- ❌ **"Failed to initialize ReGui"** → ✅ **Fixed with native UI**
+- ❌ **"attempt to index nil with 'Prefabs'"** → ✅ **No external dependencies**
+- ❌ **LoadScript errors** → ✅ **Simplified loading system**
+- ❌ **Compatibility issues** → ✅ **Works on all executors**
+
+### If You Still Have Issues:
+
+#### Method Priority (Try in order):
+1. **Main Loader** (Recommended):
+   ```lua
+   loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/loader.lua'))()
+   ```
+
+2. **Direct New Script**:
+   ```lua
+   loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/new-main.lua'))()
+   ```
+
+3. **Simple Fallback**:
    ```lua
    loadstring(game:HttpGet('https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/simple-loader.lua'))()
    ```
-2. Ensure the game is fully loaded before running the script
-3. Wait a few seconds and try again
 
-#### "LoadScript errors"
-**Solution:**
-1. Ensure your executor supports HTTP requests
-2. Check if file system functions are available
-3. Verify game is fully loaded before running script
-4. Try the loader method if direct loading fails
-
-#### "Script not working"
-**Solution:**
-1. Make sure you're in the FISCH game
-2. Check if your executor is up to date
-3. Try different loading methods (loader → simple-loader → main script)
-4. Restart your executor and try again
+#### General Tips:
+- ✅ Ensure you're in the FISCH game
+- ✅ Wait for the game to fully load before running
+- ✅ Check your executor supports HTTP requests
+- ✅ Try restarting your executor if needed
 
 ## 📞 Support
 
