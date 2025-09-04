@@ -401,17 +401,49 @@ local function createFloatingButton()
     -- Click event
     button.MouseButton1Click:Connect(function()
         -- Restore main UI
+        local restored = false
+        
+        -- Try to restore known UI
         if game.CoreGui:FindFirstChild(LibName) then
             game.CoreGui[LibName].Enabled = true
-            isMinimized = false
+            restored = true
         elseif lp.PlayerGui:FindFirstChild(LibName) then
             lp.PlayerGui[LibName].Enabled = true
-            isMinimized = false
+            restored = true
         end
+        
+        -- Try to restore any Fisch or Kavo UI
+        for _, gui in pairs(game.CoreGui:GetChildren()) do
+            if gui.Name:find("Fisch") or gui.Name:find("Kavo") then
+                gui.Enabled = true
+                restored = true
+            end
+        end
+        for _, gui in pairs(lp.PlayerGui:GetChildren()) do
+            if gui.Name:find("Fisch") or gui.Name:find("Kavo") then
+                gui.Enabled = true
+                restored = true
+            end
+        end
+        
+        -- Show standalone minimize button if it exists
+        local minimizeGui = lp.PlayerGui:FindFirstChild("FischMinimize")
+        if minimizeGui and minimizeGui:FindFirstChild("MinimizeFrame") then
+            minimizeGui.MinimizeFrame.Visible = true
+        end
+        
+        isMinimized = false
+        
         -- Remove floating button
         if floatingButton then
             floatingButton:Destroy()
             floatingButton = nil
+        end
+        
+        if restored then
+            print("UI restored successfully")
+        else
+            print("No UI found to restore")
         end
     end)
     
@@ -454,54 +486,208 @@ end
 
 -- Function to add minimize button to main UI
 local function addMinimizeButton()
-    task.wait(2) -- Wait for UI to fully load
-    
-    local kavoGui = game.CoreGui:FindFirstChild(LibName) or lp.PlayerGui:FindFirstChild(LibName)
-    if not kavoGui then return end
-    
-    local mainFrame = kavoGui:FindFirstChild("Main")
-    if not mainFrame then return end
-    
-    local topBar = mainFrame:FindFirstChild("MainHeader")
-    if not topBar then return end
-    
-    -- Create minimize button
-    local minimizeBtn = Instance.new("TextButton")
-    minimizeBtn.Name = "MinimizeButton"
-    minimizeBtn.Size = UDim2.new(0, 25, 0, 25)
-    minimizeBtn.Position = UDim2.new(1, -30, 0, 2)
-    minimizeBtn.BackgroundColor3 = Color3.fromRGB(74, 99, 135)
-    minimizeBtn.Text = "—"
-    minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    minimizeBtn.TextSize = 16
-    minimizeBtn.Font = Enum.Font.SourceSansBold
-    minimizeBtn.BorderSizePixel = 0
-    minimizeBtn.ZIndex = 10
-    minimizeBtn.Parent = topBar
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 4)
-    corner.Parent = minimizeBtn
-    
-    -- Minimize functionality
-    minimizeBtn.MouseButton1Click:Connect(function()
-        kavoGui.Enabled = false
-        isMinimized = true
-        createFloatingButton()
+    task.spawn(function()
+        local attempts = 0
+        local maxAttempts = 10
+        
+        while attempts < maxAttempts do
+            task.wait(1)
+            attempts = attempts + 1
+            
+            -- Try different GUI locations
+            local kavoGui = game.CoreGui:FindFirstChild(LibName) or lp.PlayerGui:FindFirstChild(LibName)
+            
+            if not kavoGui then
+                -- Try finding by different names
+                for _, gui in pairs(game.CoreGui:GetChildren()) do
+                    if gui.Name:find("Fisch") or gui.Name:find("Kavo") then
+                        kavoGui = gui
+                        break
+                    end
+                end
+                
+                if not kavoGui then
+                    for _, gui in pairs(lp.PlayerGui:GetChildren()) do
+                        if gui.Name:find("Fisch") or gui.Name:find("Kavo") then
+                            kavoGui = gui
+                            break
+                        end
+                    end
+                end
+            end
+            
+            if kavoGui then
+                local mainFrame = kavoGui:FindFirstChild("Main")
+                if mainFrame then
+                    -- Try different header names
+                    local topBar = mainFrame:FindFirstChild("MainHeader") or 
+                                   mainFrame:FindFirstChild("TopBar") or 
+                                   mainFrame:FindFirstChild("Header")
+                    
+                    if topBar then
+                        -- Check if minimize button already exists
+                        if topBar:FindFirstChild("MinimizeButton") then
+                            print("Minimize button already exists")
+                            return
+                        end
+                        
+                        -- Create minimize button
+                        local minimizeBtn = Instance.new("TextButton")
+                        minimizeBtn.Name = "MinimizeButton"
+                        minimizeBtn.Size = UDim2.new(0, 30, 0, 25)
+                        minimizeBtn.Position = UDim2.new(1, -35, 0, 2)
+                        minimizeBtn.BackgroundColor3 = Color3.fromRGB(86, 76, 251)
+                        minimizeBtn.Text = "—"
+                        minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                        minimizeBtn.TextSize = 18
+                        minimizeBtn.Font = Enum.Font.SourceSansBold
+                        minimizeBtn.BorderSizePixel = 0
+                        minimizeBtn.ZIndex = 100
+                        minimizeBtn.Parent = topBar
+                        
+                        local corner = Instance.new("UICorner")
+                        corner.CornerRadius = UDim.new(0, 4)
+                        corner.Parent = minimizeBtn
+                        
+                        -- Minimize functionality
+                        minimizeBtn.MouseButton1Click:Connect(function()
+                            kavoGui.Enabled = false
+                            isMinimized = true
+                            createFloatingButton()
+                            print("UI minimized")
+                        end)
+                        
+                        -- Hover effects
+                        minimizeBtn.MouseEnter:Connect(function()
+                            minimizeBtn.BackgroundColor3 = Color3.fromRGB(106, 96, 255)
+                        end)
+                        
+                        minimizeBtn.MouseLeave:Connect(function()
+                            minimizeBtn.BackgroundColor3 = Color3.fromRGB(86, 76, 251)
+                        end)
+                        
+                        print("Minimize button created successfully!")
+                        return
+                    else
+                        print("Header not found, attempt " .. attempts)
+                    end
+                else
+                    print("Main frame not found, attempt " .. attempts)
+                end
+            else
+                print("GUI not found, attempt " .. attempts)
+            end
+        end
+        
+        print("Failed to add minimize button after " .. maxAttempts .. " attempts")
     end)
-    
-    -- Hover effects
-    minimizeBtn.MouseEnter:Connect(function()
-        minimizeBtn.BackgroundColor3 = Color3.fromRGB(94, 119, 155)
-    end)
-    
-    minimizeBtn.MouseLeave:Connect(function()
-        minimizeBtn.BackgroundColor3 = Color3.fromRGB(74, 99, 135)
-    end)
+end
 end
 
 -- Create UI Window
 Window = library.CreateLib("🎣 Fisch Script", "Ocean")
+
+-- Debug: Check if UI was created
+task.spawn(function()
+    task.wait(1)
+    print("=== Fisch UI Debug Info ===")
+    print("LibName:", LibName)
+    print("Library loaded:", library ~= nil)
+    print("Window created:", Window ~= nil)
+    
+    -- Check CoreGui
+    local coreGuiCount = 0
+    for _, gui in pairs(game.CoreGui:GetChildren()) do
+        if gui:IsA("ScreenGui") then
+            print("CoreGui:", gui.Name)
+            coreGuiCount = coreGuiCount + 1
+        end
+    end
+    print("Total CoreGui ScreenGuis:", coreGuiCount)
+    
+    -- Check PlayerGui  
+    local playerGuiCount = 0
+    for _, gui in pairs(lp.PlayerGui:GetChildren()) do
+        if gui:IsA("ScreenGui") then
+            print("PlayerGui:", gui.Name)
+            playerGuiCount = playerGuiCount + 1
+        end
+    end
+    print("Total PlayerGui ScreenGuis:", playerGuiCount)
+    print("=========================")
+end)
+
+-- Alternative minimize button approach - add directly after window creation
+task.spawn(function()
+    task.wait(0.5)
+    
+    -- Create standalone minimize button if Kavo method fails
+    local screenGui = lp.PlayerGui:FindFirstChild("ScreenGui") or game.CoreGui:FindFirstChild("ScreenGui")
+    
+    if not screenGui then
+        -- Create our own minimize button GUI
+        screenGui = Instance.new("ScreenGui")
+        screenGui.Name = "FischMinimize"
+        screenGui.ResetOnSpawn = false
+        screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        
+        local minimizeFrame = Instance.new("Frame")
+        minimizeFrame.Name = "MinimizeFrame"
+        minimizeFrame.Size = UDim2.new(0, 120, 0, 30)
+        minimizeFrame.Position = UDim2.new(1, -140, 0, 10)
+        minimizeFrame.BackgroundColor3 = Color3.fromRGB(26, 32, 58)
+        minimizeFrame.BorderSizePixel = 0
+        minimizeFrame.Parent = screenGui
+        
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 6)
+        corner.Parent = minimizeFrame
+        
+        local minimizeBtn = Instance.new("TextButton")
+        minimizeBtn.Name = "MinimizeButton"
+        minimizeBtn.Size = UDim2.new(1, 0, 1, 0)
+        minimizeBtn.Position = UDim2.new(0, 0, 0, 0)
+        minimizeBtn.BackgroundTransparency = 1
+        minimizeBtn.Text = "— Minimize Fisch UI"
+        minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        minimizeBtn.TextSize = 12
+        minimizeBtn.Font = Enum.Font.SourceSansBold
+        minimizeBtn.Parent = minimizeFrame
+        
+        -- Minimize functionality
+        minimizeBtn.MouseButton1Click:Connect(function()
+            -- Hide any visible Fisch UI
+            for _, gui in pairs(game.CoreGui:GetChildren()) do
+                if gui.Name:find("Fisch") or gui.Name:find("Kavo") or gui.Name == LibName then
+                    gui.Enabled = false
+                end
+            end
+            for _, gui in pairs(lp.PlayerGui:GetChildren()) do
+                if gui.Name:find("Fisch") or gui.Name:find("Kavo") or gui.Name == LibName then
+                    gui.Enabled = false
+                end
+            end
+            
+            minimizeFrame.Visible = false
+            isMinimized = true
+            createFloatingButton()
+            print("UI minimized via standalone button")
+        end)
+        
+        -- Hover effects
+        minimizeBtn.MouseEnter:Connect(function()
+            minimizeFrame.BackgroundColor3 = Color3.fromRGB(46, 52, 78)
+        end)
+        
+        minimizeBtn.MouseLeave:Connect(function()
+            minimizeFrame.BackgroundColor3 = Color3.fromRGB(26, 32, 58)
+        end)
+        
+        -- Add to PlayerGui
+        screenGui.Parent = lp.PlayerGui
+        print("Standalone minimize button created")
+    end
+end)
 
 -- Add dragging functionality and minimize button after UI loads
 task.spawn(function()
