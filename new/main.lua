@@ -3,6 +3,7 @@ local Players = cloneref(game:GetService('Players'))
 local ReplicatedStorage = cloneref(game:GetService('ReplicatedStorage'))
 local RunService = cloneref(game:GetService('RunService'))
 local GuiService = cloneref(game:GetService('GuiService'))
+local UserInputService = cloneref(game:GetService('UserInputService'))
 
 --// Variables
 local flags = {}
@@ -395,15 +396,18 @@ local function createFloatingButton()
     
     -- Click event
     button.MouseButton1Click:Connect(function()
-        if isMinimized then
-            -- Show main UI
-            local mainFrame = lp.PlayerGui:FindFirstChild("Kavo"):FindFirstChild("Main")
-            if mainFrame then
-                mainFrame.Visible = true
-                isMinimized = false
-                screenGui:Destroy()
-                floatingButton = nil
-            end
+        -- Restore main UI
+        if game.CoreGui:FindFirstChild(LibName) then
+            game.CoreGui[LibName].Enabled = true
+            isMinimized = false
+        elseif lp.PlayerGui:FindFirstChild(LibName) then
+            lp.PlayerGui[LibName].Enabled = true
+            isMinimized = false
+        end
+        -- Remove floating button
+        if floatingButton then
+            floatingButton:Destroy()
+            floatingButton = nil
         end
     end)
     
@@ -446,28 +450,29 @@ end
 
 -- Function to add minimize button to main UI
 local function addMinimizeButton()
-    task.wait(1) -- Wait for UI to fully load
+    task.wait(2) -- Wait for UI to fully load
     
-    local kavoGui = lp.PlayerGui:FindFirstChild("Kavo")
+    local kavoGui = game.CoreGui:FindFirstChild(LibName) or lp.PlayerGui:FindFirstChild(LibName)
     if not kavoGui then return end
     
     local mainFrame = kavoGui:FindFirstChild("Main")
     if not mainFrame then return end
     
-    local topBar = mainFrame:FindFirstChild("TopBar")
+    local topBar = mainFrame:FindFirstChild("MainHeader")
     if not topBar then return end
     
     -- Create minimize button
     local minimizeBtn = Instance.new("TextButton")
     minimizeBtn.Name = "MinimizeButton"
     minimizeBtn.Size = UDim2.new(0, 25, 0, 25)
-    minimizeBtn.Position = UDim2.new(1, -55, 0, 5)
+    minimizeBtn.Position = UDim2.new(1, -30, 0, 2)
     minimizeBtn.BackgroundColor3 = Color3.fromRGB(74, 99, 135)
-    minimizeBtn.Text = "_"
+    minimizeBtn.Text = "—"
     minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     minimizeBtn.TextSize = 16
     minimizeBtn.Font = Enum.Font.SourceSansBold
     minimizeBtn.BorderSizePixel = 0
+    minimizeBtn.ZIndex = 10
     minimizeBtn.Parent = topBar
     
     local corner = Instance.new("UICorner")
@@ -476,7 +481,7 @@ local function addMinimizeButton()
     
     -- Minimize functionality
     minimizeBtn.MouseButton1Click:Connect(function()
-        mainFrame.Visible = false
+        kavoGui.Enabled = false
         isMinimized = true
         createFloatingButton()
     end)
@@ -490,12 +495,73 @@ local function addMinimizeButton()
         minimizeBtn.BackgroundColor3 = Color3.fromRGB(74, 99, 135)
     end)
 end
+        minimizeBtn.BackgroundColor3 = Color3.fromRGB(94, 119, 155)
+    end)
+    
+    minimizeBtn.MouseLeave:Connect(function()
+        minimizeBtn.BackgroundColor3 = Color3.fromRGB(74, 99, 135)
+    end)
+end
 
 -- Create UI Window
 Window = library.CreateLib("🎣 Fisch Script", "Ocean")
 
--- Add minimize button after UI loads
-task.spawn(addMinimizeButton)
+-- Add dragging functionality and minimize button after UI loads
+task.spawn(function()
+    task.wait(1) -- Wait for UI to fully load
+    
+    -- Add dragging functionality
+    local gui = game.CoreGui:FindFirstChild(LibName) or lp.PlayerGui:FindFirstChild(LibName)
+    if gui then
+        local mainFrame = gui:FindFirstChild("Main")
+        local header = mainFrame and mainFrame:FindFirstChild("MainHeader")
+        
+        if mainFrame and header then
+            -- Enable dragging using Kavo's built-in dragging if available
+            if library and library.DraggingEnabled then
+                pcall(function()
+                    library:DraggingEnabled(header, mainFrame)
+                end)
+            else
+                -- Custom dragging implementation
+                local dragging = false
+                local dragInput = nil
+                local dragStart = nil
+                local startPos = nil
+                
+                header.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        dragging = true
+                        dragStart = input.Position
+                        startPos = mainFrame.Position
+                        
+                        input.Changed:Connect(function()
+                            if input.UserInputState == Enum.UserInputState.End then
+                                dragging = false
+                            end
+                        end)
+                    end
+                end)
+                
+                header.InputChanged:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseMovement then
+                        dragInput = input
+                    end
+                end)
+                
+                UserInputService.InputChanged:Connect(function(input)
+                    if input == dragInput and dragging then
+                        local delta = input.Position - dragStart
+                        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+                    end
+                end)
+            end
+        end
+    end
+    
+    -- Add minimize button
+    addMinimizeButton()
+end)
 
 -- Create Tabs
 local AutoTab = Window:NewTab("🎣 Automation")
@@ -621,6 +687,42 @@ end)
 local FishSection = VisualTab:NewSection("Fish Abundance")
 FishSection:NewToggle("Free Fish Radar", "Show fish abundance zones", function(state)
     flags['fishabundance'] = state
+end)
+
+-- Add keybind to toggle UI
+UserInputService.InputBegan:Connect(function(key, gameProcessed)
+    if gameProcessed then return end
+    if key.KeyCode == Enum.KeyCode.RightControl then
+        if game.CoreGui:FindFirstChild(LibName) then
+            local gui = game.CoreGui[LibName]
+            if gui.Enabled then
+                gui.Enabled = false
+                isMinimized = true
+                createFloatingButton()
+            else
+                gui.Enabled = true
+                isMinimized = false
+                if floatingButton then
+                    floatingButton:Destroy()
+                    floatingButton = nil
+                end
+            end
+        elseif lp.PlayerGui:FindFirstChild(LibName) then
+            local gui = lp.PlayerGui[LibName]
+            if gui.Enabled then
+                gui.Enabled = false
+                isMinimized = true
+                createFloatingButton()
+            else
+                gui.Enabled = true
+                isMinimized = false
+                if floatingButton then
+                    floatingButton:Destroy()
+                    floatingButton = nil
+                end
+            end
+        end
+    end
 end)
 
 --// Loops
