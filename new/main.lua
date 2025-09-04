@@ -3,7 +3,6 @@ local Players = cloneref(game:GetService('Players'))
 local ReplicatedStorage = cloneref(game:GetService('ReplicatedStorage'))
 local RunService = cloneref(game:GetService('RunService'))
 local GuiService = cloneref(game:GetService('GuiService'))
-local UserInputService = cloneref(game:GetService('UserInputService'))
 
 --// Variables
 local flags = {}
@@ -278,224 +277,63 @@ local library
 local Window
 local isMinimized = false
 local floatingButton = nil
-local LibName = "FischScript" .. tostring(math.random(1, 100000))
 
 -- Load Kavo UI from GitHub repository or local file
 local kavoUrl = 'https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/new/Kavo.lua'
 
--- Simple and reliable UI loading
-local success = false
-library = nil
-
--- Try to load Kavo UI
+-- Try to create folder and download library
 pcall(function()
-    library = loadstring(game:HttpGet(kavoUrl))()
-    if library and library.CreateLib then
-        success = true
-        print("Kavo UI loaded successfully")
+    if CheckFunc(makefolder) and (CheckFunc(isfolder) and not isfolder('fisch')) then
+        makefolder('fisch')
     end
 end)
 
--- Simple fallback UI if Kavo fails
+pcall(function()
+    if CheckFunc(writefile) and (CheckFunc(isfile) and not isfile('fisch/kavo.lua')) then
+        writefile('fisch/kavo.lua', game:HttpGet(kavoUrl))
+    end
+end)
+
+-- Try to load library with multiple methods
+local success = false
+if CheckFunc(loadfile) then
+    pcall(function()
+        library = loadfile('fisch/kavo.lua')()
+        success = true
+    end)
+end
+
+if not success then
+    pcall(function()
+        library = loadstring(game:HttpGet(kavoUrl))()
+        success = true
+    end)
+end
+
+-- Fallback to simple UI if Kavo fails
 if not success or not library then
-    print("Using fallback UI")
+    warn("Failed to load Kavo UI, using fallback")
+    -- Create simple UI structure
     library = {}
-    
     function library.CreateLib(name, theme)
-        print("Creating fallback UI:", name)
-        
-        -- Create simple GUI
-        local screenGui = Instance.new("ScreenGui")
-        screenGui.Name = LibName
-        screenGui.ResetOnSpawn = false
-        screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        
-        local mainFrame = Instance.new("Frame")
-        mainFrame.Name = "Main"
-        mainFrame.Size = UDim2.new(0, 500, 0, 400)
-        mainFrame.Position = UDim2.new(0.5, -250, 0.5, -200)
-        mainFrame.BackgroundColor3 = Color3.fromRGB(26, 32, 58)
-        mainFrame.BorderSizePixel = 0
-        mainFrame.Parent = screenGui
-        
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 8)
-        corner.Parent = mainFrame
-        
-        -- Header
-        local header = Instance.new("Frame")
-        header.Name = "MainHeader"
-        header.Size = UDim2.new(1, 0, 0, 40)
-        header.BackgroundColor3 = Color3.fromRGB(38, 45, 71)
-        header.BorderSizePixel = 0
-        header.Parent = mainFrame
-        
-        local headerCorner = Instance.new("UICorner")
-        headerCorner.CornerRadius = UDim.new(0, 8)
-        headerCorner.Parent = header
-        
-        local coverFrame = Instance.new("Frame")
-        coverFrame.Size = UDim2.new(1, 0, 0, 20)
-        coverFrame.Position = UDim2.new(0, 0, 1, -20)
-        coverFrame.BackgroundColor3 = Color3.fromRGB(38, 45, 71)
-        coverFrame.BorderSizePixel = 0
-        coverFrame.Parent = header
-        
-        local title = Instance.new("TextLabel")
-        title.Name = "Title"
-        title.Size = UDim2.new(1, -40, 1, 0)
-        title.Position = UDim2.new(0, 10, 0, 0)
-        title.BackgroundTransparency = 1
-        title.Text = name
-        title.TextColor3 = Color3.fromRGB(255, 255, 255)
-        title.TextSize = 16
-        title.Font = Enum.Font.SourceSansBold
-        title.TextXAlignment = Enum.TextXAlignment.Left
-        title.Parent = header
-        
-        -- Close button
-        local closeBtn = Instance.new("TextButton")
-        closeBtn.Name = "CloseButton"
-        closeBtn.Size = UDim2.new(0, 30, 0, 30)
-        closeBtn.Position = UDim2.new(1, -35, 0, 5)
-        closeBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
-        closeBtn.Text = "×"
-        closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        closeBtn.TextSize = 20
-        closeBtn.Font = Enum.Font.SourceSansBold
-        closeBtn.BorderSizePixel = 0
-        closeBtn.Parent = header
-        
-        local closeBtnCorner = Instance.new("UICorner")
-        closeBtnCorner.CornerRadius = UDim.new(0, 4)
-        closeBtnCorner.Parent = closeBtn
-        
-        closeBtn.MouseButton1Click:Connect(function()
-            screenGui:Destroy()
-        end)
-        
-        -- Content area
-        local contentFrame = Instance.new("ScrollingFrame")
-        contentFrame.Name = "Content"
-        contentFrame.Size = UDim2.new(1, -20, 1, -60)
-        contentFrame.Position = UDim2.new(0, 10, 0, 50)
-        contentFrame.BackgroundTransparency = 1
-        contentFrame.BorderSizePixel = 0
-        contentFrame.ScrollBarThickness = 6
-        contentFrame.Parent = mainFrame
-        
-        local contentLayout = Instance.new("UIListLayout")
-        contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        contentLayout.Padding = UDim.new(0, 10)
-        contentLayout.Parent = contentFrame
-        
-        -- Add to PlayerGui
-        screenGui.Parent = lp.PlayerGui
-        
-        -- Make draggable
-        local dragging = false
-        local dragInput = nil
-        local dragStart = nil
-        local startPos = nil
-        
-        header.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = true
-                dragStart = input.Position
-                startPos = mainFrame.Position
-            end
-        end)
-        
-        header.InputChanged:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                dragInput = input
-            end
-        end)
-        
-        UserInputService.InputChanged:Connect(function(input)
-            if input == dragInput and dragging then
-                local delta = input.Position - dragStart
-                mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-            end
-        end)
-        
-        header.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = false
-            end
-        end)
-        
         local lib = {}
-        local tabCount = 0
-        
-        function lib:NewTab(tabName)
-            tabCount = tabCount + 1
-            
-            -- Create tab button
-            local tabBtn = Instance.new("TextButton")
-            tabBtn.Name = "Tab" .. tabCount
-            tabBtn.Size = UDim2.new(1, 0, 0, 35)
-            tabBtn.BackgroundColor3 = Color3.fromRGB(86, 76, 251)
-            tabBtn.Text = tabName or "Tab " .. tabCount
-            tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            tabBtn.TextSize = 14
-            tabBtn.Font = Enum.Font.SourceSansBold
-            tabBtn.BorderSizePixel = 0
-            tabBtn.Parent = contentFrame
-            
-            local tabCorner = Instance.new("UICorner")
-            tabCorner.CornerRadius = UDim.new(0, 6)
-            tabCorner.Parent = tabBtn
-            
-            -- Hover effects
-            tabBtn.MouseEnter:Connect(function()
-                tabBtn.BackgroundColor3 = Color3.fromRGB(106, 96, 255)
-            end)
-            
-            tabBtn.MouseLeave:Connect(function()
-                tabBtn.BackgroundColor3 = Color3.fromRGB(86, 76, 251)
-            end)
-            
+        function lib:NewTab(name)
             local tab = {}
-            local sectionCount = 0
-            
-            function tab:NewSection(sectionName)
-                sectionCount = sectionCount + 1
-                
+            function tab:NewSection(name)
                 local section = {}
-                local elementCount = 0
-                
                 function section:NewToggle(name, desc, callback)
-                    elementCount = elementCount + 1
                     if callback then callback(false) end
-                    return section
                 end
-                
                 function section:NewDropdown(name, desc, options, callback)
-                    elementCount = elementCount + 1
-                    if callback and options and #options > 0 then 
-                        callback(options[1]) 
-                    end
-                    return section
+                    if callback then callback(options[1]) end
                 end
-                
                 function section:NewButton(name, desc, callback)
-                    elementCount = elementCount + 1
-                    return section
+                    -- Button functionality
                 end
-                
-                function section:NewSlider(name, desc, min, max, default, callback)
-                    elementCount = elementCount + 1
-                    if callback then callback(default or min or 0) end
-                    return section
-                end
-                
                 return section
             end
-            
             return tab
         end
-        
         return lib
     end
 end
@@ -557,50 +395,15 @@ local function createFloatingButton()
     
     -- Click event
     button.MouseButton1Click:Connect(function()
-        -- Restore main UI
-        local restored = false
-        
-        -- Try to restore known UI
-        if game.CoreGui:FindFirstChild(LibName) then
-            game.CoreGui[LibName].Enabled = true
-            restored = true
-        elseif lp.PlayerGui:FindFirstChild(LibName) then
-            lp.PlayerGui[LibName].Enabled = true
-            restored = true
-        end
-        
-        -- Try to restore any Fisch or Kavo UI
-        for _, gui in pairs(game.CoreGui:GetChildren()) do
-            if gui.Name:find("Fisch") or gui.Name:find("Kavo") then
-                gui.Enabled = true
-                restored = true
+        if isMinimized then
+            -- Show main UI
+            local mainFrame = lp.PlayerGui:FindFirstChild("Kavo"):FindFirstChild("Main")
+            if mainFrame then
+                mainFrame.Visible = true
+                isMinimized = false
+                screenGui:Destroy()
+                floatingButton = nil
             end
-        end
-        for _, gui in pairs(lp.PlayerGui:GetChildren()) do
-            if gui.Name:find("Fisch") or gui.Name:find("Kavo") then
-                gui.Enabled = true
-                restored = true
-            end
-        end
-        
-        -- Show standalone minimize button if it exists
-        local minimizeGui = lp.PlayerGui:FindFirstChild("FischMinimize")
-        if minimizeGui and minimizeGui:FindFirstChild("MinimizeFrame") then
-            minimizeGui.MinimizeFrame.Visible = true
-        end
-        
-        isMinimized = false
-        
-        -- Remove floating button
-        if floatingButton then
-            floatingButton:Destroy()
-            floatingButton = nil
-        end
-        
-        if restored then
-            print("UI restored successfully")
-        else
-            print("No UI found to restore")
         end
     end)
     
@@ -643,263 +446,56 @@ end
 
 -- Function to add minimize button to main UI
 local function addMinimizeButton()
-    task.spawn(function()
-        task.wait(1) -- Wait for UI to load
-        
-        print("Looking for UI to add minimize button...")
-        
-        -- Find the UI
-        local targetGui = nil
-        local targetFrame = nil
-        local targetHeader = nil
-        
-        -- Check PlayerGui first
-        for _, gui in pairs(lp.PlayerGui:GetChildren()) do
-            if gui:IsA("ScreenGui") and (gui.Name == LibName or gui.Name:find("Fisch")) then
-                local main = gui:FindFirstChild("Main")
-                if main then
-                    local header = main:FindFirstChild("MainHeader") or main:FindFirstChild("Header") or main:FindFirstChild("TopBar")
-                    if header then
-                        targetGui = gui
-                        targetFrame = main  
-                        targetHeader = header
-                        break
-                    end
-                end
-            end
-        end
-        
-        -- Check CoreGui if not found in PlayerGui
-        if not targetGui then
-            for _, gui in pairs(game.CoreGui:GetChildren()) do
-                if gui:IsA("ScreenGui") and (gui.Name == LibName or gui.Name:find("Fisch") or gui.Name:find("Kavo")) then
-                    local main = gui:FindFirstChild("Main")
-                    if main then
-                        local header = main:FindFirstChild("MainHeader") or main:FindFirstChild("Header") or main:FindFirstChild("TopBar")
-                        if header then
-                            targetGui = gui
-                            targetFrame = main
-                            targetHeader = header
-                            break
-                        end
-                    end
-                end
-            end
-        end
-        
-        if targetGui and targetHeader then
-            print("Found UI, adding minimize button...")
-            
-            -- Check if minimize button already exists
-            if targetHeader:FindFirstChild("MinimizeButton") then
-                print("Minimize button already exists")
-                return
-            end
-            
-            -- Create minimize button
-            local minimizeBtn = Instance.new("TextButton")
-            minimizeBtn.Name = "MinimizeButton"
-            minimizeBtn.Size = UDim2.new(0, 30, 0, 25)
-            minimizeBtn.Position = UDim2.new(1, -35, 0, 7)
-            minimizeBtn.BackgroundColor3 = Color3.fromRGB(86, 76, 251)
-            minimizeBtn.Text = "—"
-            minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            minimizeBtn.TextSize = 16
-            minimizeBtn.Font = Enum.Font.SourceSansBold
-            minimizeBtn.BorderSizePixel = 0
-            minimizeBtn.ZIndex = 100
-            minimizeBtn.Parent = targetHeader
-            
-            local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(0, 4)
-            corner.Parent = minimizeBtn
-            
-            -- Minimize functionality
-            minimizeBtn.MouseButton1Click:Connect(function()
-                targetGui.Enabled = false
-                isMinimized = true
-                createFloatingButton()
-                print("UI minimized successfully")
-            end)
-            
-            -- Hover effects
-            minimizeBtn.MouseEnter:Connect(function()
-                minimizeBtn.BackgroundColor3 = Color3.fromRGB(106, 96, 255)
-            end)
-            
-            minimizeBtn.MouseLeave:Connect(function()
-                minimizeBtn.BackgroundColor3 = Color3.fromRGB(86, 76, 251)
-            end)
-            
-            print("Minimize button added successfully!")
-        else
-            print("Could not find suitable UI to add minimize button")
-        end
+    task.wait(1) -- Wait for UI to fully load
+    
+    local kavoGui = lp.PlayerGui:FindFirstChild("Kavo")
+    if not kavoGui then return end
+    
+    local mainFrame = kavoGui:FindFirstChild("Main")
+    if not mainFrame then return end
+    
+    local topBar = mainFrame:FindFirstChild("TopBar")
+    if not topBar then return end
+    
+    -- Create minimize button
+    local minimizeBtn = Instance.new("TextButton")
+    minimizeBtn.Name = "MinimizeButton"
+    minimizeBtn.Size = UDim2.new(0, 25, 0, 25)
+    minimizeBtn.Position = UDim2.new(1, -55, 0, 5)
+    minimizeBtn.BackgroundColor3 = Color3.fromRGB(74, 99, 135)
+    minimizeBtn.Text = "_"
+    minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    minimizeBtn.TextSize = 16
+    minimizeBtn.Font = Enum.Font.SourceSansBold
+    minimizeBtn.BorderSizePixel = 0
+    minimizeBtn.Parent = topBar
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 4)
+    corner.Parent = minimizeBtn
+    
+    -- Minimize functionality
+    minimizeBtn.MouseButton1Click:Connect(function()
+        mainFrame.Visible = false
+        isMinimized = true
+        createFloatingButton()
     end)
-end
+    
+    -- Hover effects
+    minimizeBtn.MouseEnter:Connect(function()
+        minimizeBtn.BackgroundColor3 = Color3.fromRGB(94, 119, 155)
+    end)
+    
+    minimizeBtn.MouseLeave:Connect(function()
+        minimizeBtn.BackgroundColor3 = Color3.fromRGB(74, 99, 135)
+    end)
 end
 
 -- Create UI Window
 Window = library.CreateLib("🎣 Fisch Script", "Ocean")
 
--- Debug: Check if UI was created
-task.spawn(function()
-    task.wait(1)
-    print("=== Fisch UI Debug Info ===")
-    print("LibName:", LibName)
-    print("Library loaded:", library ~= nil)
-    print("Window created:", Window ~= nil)
-    
-    -- Check CoreGui
-    local coreGuiCount = 0
-    for _, gui in pairs(game.CoreGui:GetChildren()) do
-        if gui:IsA("ScreenGui") then
-            print("CoreGui:", gui.Name)
-            coreGuiCount = coreGuiCount + 1
-        end
-    end
-    print("Total CoreGui ScreenGuis:", coreGuiCount)
-    
-    -- Check PlayerGui  
-    local playerGuiCount = 0
-    for _, gui in pairs(lp.PlayerGui:GetChildren()) do
-        if gui:IsA("ScreenGui") then
-            print("PlayerGui:", gui.Name)
-            playerGuiCount = playerGuiCount + 1
-        end
-    end
-    print("Total PlayerGui ScreenGuis:", playerGuiCount)
-    print("=========================")
-end)
-
--- Alternative minimize button approach - add directly after window creation
-task.spawn(function()
-    task.wait(0.5)
-    
-    -- Create standalone minimize button if Kavo method fails
-    local screenGui = lp.PlayerGui:FindFirstChild("ScreenGui") or game.CoreGui:FindFirstChild("ScreenGui")
-    
-    if not screenGui then
-        -- Create our own minimize button GUI
-        screenGui = Instance.new("ScreenGui")
-        screenGui.Name = "FischMinimize"
-        screenGui.ResetOnSpawn = false
-        screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        
-        local minimizeFrame = Instance.new("Frame")
-        minimizeFrame.Name = "MinimizeFrame"
-        minimizeFrame.Size = UDim2.new(0, 120, 0, 30)
-        minimizeFrame.Position = UDim2.new(1, -140, 0, 10)
-        minimizeFrame.BackgroundColor3 = Color3.fromRGB(26, 32, 58)
-        minimizeFrame.BorderSizePixel = 0
-        minimizeFrame.Parent = screenGui
-        
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 6)
-        corner.Parent = minimizeFrame
-        
-        local minimizeBtn = Instance.new("TextButton")
-        minimizeBtn.Name = "MinimizeButton"
-        minimizeBtn.Size = UDim2.new(1, 0, 1, 0)
-        minimizeBtn.Position = UDim2.new(0, 0, 0, 0)
-        minimizeBtn.BackgroundTransparency = 1
-        minimizeBtn.Text = "— Minimize Fisch UI"
-        minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        minimizeBtn.TextSize = 12
-        minimizeBtn.Font = Enum.Font.SourceSansBold
-        minimizeBtn.Parent = minimizeFrame
-        
-        -- Minimize functionality
-        minimizeBtn.MouseButton1Click:Connect(function()
-            -- Hide any visible Fisch UI
-            for _, gui in pairs(game.CoreGui:GetChildren()) do
-                if gui.Name:find("Fisch") or gui.Name:find("Kavo") or gui.Name == LibName then
-                    gui.Enabled = false
-                end
-            end
-            for _, gui in pairs(lp.PlayerGui:GetChildren()) do
-                if gui.Name:find("Fisch") or gui.Name:find("Kavo") or gui.Name == LibName then
-                    gui.Enabled = false
-                end
-            end
-            
-            minimizeFrame.Visible = false
-            isMinimized = true
-            createFloatingButton()
-            print("UI minimized via standalone button")
-        end)
-        
-        -- Hover effects
-        minimizeBtn.MouseEnter:Connect(function()
-            minimizeFrame.BackgroundColor3 = Color3.fromRGB(46, 52, 78)
-        end)
-        
-        minimizeBtn.MouseLeave:Connect(function()
-            minimizeFrame.BackgroundColor3 = Color3.fromRGB(26, 32, 58)
-        end)
-        
-        -- Add to PlayerGui
-        screenGui.Parent = lp.PlayerGui
-        print("Standalone minimize button created")
-    end
-end)
-
--- Add dragging functionality and minimize button after UI loads
-task.spawn(function()
-    task.wait(1) -- Wait for UI to fully load
-    
-    -- Add dragging functionality
-    local gui = game.CoreGui:FindFirstChild(LibName) or lp.PlayerGui:FindFirstChild(LibName)
-    if gui then
-        local mainFrame = gui:FindFirstChild("Main")
-        local header = mainFrame and mainFrame:FindFirstChild("MainHeader")
-        
-        if mainFrame and header then
-            -- Enable dragging using Kavo's built-in dragging if available
-            if library and library.DraggingEnabled then
-                pcall(function()
-                    library:DraggingEnabled(header, mainFrame)
-                end)
-            else
-                -- Custom dragging implementation
-                local dragging = false
-                local dragInput = nil
-                local dragStart = nil
-                local startPos = nil
-                
-                header.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        dragging = true
-                        dragStart = input.Position
-                        startPos = mainFrame.Position
-                        
-                        input.Changed:Connect(function()
-                            if input.UserInputState == Enum.UserInputState.End then
-                                dragging = false
-                            end
-                        end)
-                    end
-                end)
-                
-                header.InputChanged:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseMovement then
-                        dragInput = input
-                    end
-                end)
-                
-                UserInputService.InputChanged:Connect(function(input)
-                    if input == dragInput and dragging then
-                        local delta = input.Position - dragStart
-                        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-                    end
-                end)
-            end
-        end
-    end
-    
-    -- Add minimize button
-    addMinimizeButton()
-end)
+-- Add minimize button after UI loads
+task.spawn(addMinimizeButton)
 
 -- Create Tabs
 local AutoTab = Window:NewTab("🎣 Automation")
@@ -1027,42 +623,6 @@ FishSection:NewToggle("Free Fish Radar", "Show fish abundance zones", function(s
     flags['fishabundance'] = state
 end)
 
--- Add keybind to toggle UI
-UserInputService.InputBegan:Connect(function(key, gameProcessed)
-    if gameProcessed then return end
-    if key.KeyCode == Enum.KeyCode.RightControl then
-        if game.CoreGui:FindFirstChild(LibName) then
-            local gui = game.CoreGui[LibName]
-            if gui.Enabled then
-                gui.Enabled = false
-                isMinimized = true
-                createFloatingButton()
-            else
-                gui.Enabled = true
-                isMinimized = false
-                if floatingButton then
-                    floatingButton:Destroy()
-                    floatingButton = nil
-                end
-            end
-        elseif lp.PlayerGui:FindFirstChild(LibName) then
-            local gui = lp.PlayerGui[LibName]
-            if gui.Enabled then
-                gui.Enabled = false
-                isMinimized = true
-                createFloatingButton()
-            else
-                gui.Enabled = true
-                isMinimized = false
-                if floatingButton then
-                    floatingButton:Destroy()
-                    floatingButton = nil
-                end
-            end
-        end
-    end
-end)
-
 --// Loops
 RunService.Heartbeat:Connect(function()
     -- Autofarm
@@ -1112,76 +672,169 @@ RunService.Heartbeat:Connect(function()
     if flags['rodchams'] then
         local rod = FindRod()
         if rod ~= nil and FindChild(rod, 'Details') then
-            local rodColor = flags['rodcolor'] or Color3.new(1, 0, 0)
-            local rodMaterial = flags['rodmaterial'] or 'ForceField'
-            for i,v in pairs(rod.Details:GetChildren()) do
-                if v.ClassName == 'MeshPart' then
-                    v.Color = rodColor
-                    v.Material = rodMaterial
+            local rodName = tostring(rod)
+            if not RodColors[rodName] then
+                RodColors[rodName] = {}
+                RodMaterials[rodName] = {}
+            end
+            for i,v in rod['Details']:GetDescendants() do
+                if v:IsA('BasePart') or v:IsA('MeshPart') then
+                    if v.Color ~= Color3.fromRGB(100, 100, 255) then
+                        RodColors[rodName][v.Name..i] = v.Color
+                    end
+                    if RodMaterials[rodName][v.Name..i] == nil then
+                        if v.Material == Enum.Material.Neon then
+                            RodMaterials[rodName][v.Name..i] = Enum.Material.Neon
+                        elseif v.Material ~= Enum.Material.ForceField and v.Material ~= Enum.Material[flags['rodmaterial']] then
+                            RodMaterials[rodName][v.Name..i] = v.Material
+                        end
+                    end
+                    v.Material = Enum.Material[flags['rodmaterial']]
+                    v.Color = Color3.fromRGB(100, 100, 255)
                 end
             end
+            if rod['handle'].Color ~= Color3.fromRGB(100, 100, 255) then
+                RodColors[rodName]['handle'] = rod['handle'].Color
+            end
+            if rod['handle'].Material ~= Enum.Material.ForceField and rod['handle'].Material ~= Enum.Material.Neon and rod['handle'].Material ~= Enum.Material[flags['rodmaterial']] then
+                RodMaterials[rodName]['handle'] = rod['handle'].Material
+            end
+            rod['handle'].Material = Enum.Material[flags['rodmaterial']]
+            rod['handle'].Color = Color3.fromRGB(100, 100, 255)
         end
     elseif not flags['rodchams'] then
         local rod = FindRod()
         if rod ~= nil and FindChild(rod, 'Details') then
-            for i,v in pairs(rod.Details:GetChildren()) do
-                if v.ClassName == 'MeshPart' then
-                    v.Color = Color3.fromRGB(139, 138, 133)
-                    v.Material = 'Metal'
+            local rodName = tostring(rod)
+            if RodColors[rodName] and RodMaterials[rodName] then
+                for i,v in rod['Details']:GetDescendants() do
+                    if v:IsA('BasePart') or v:IsA('MeshPart') then
+                        if RodMaterials[rodName][v.Name..i] and RodColors[rodName][v.Name..i] then
+                            v.Material = RodMaterials[rodName][v.Name..i]
+                            v.Color = RodColors[rodName][v.Name..i]
+                        end
+                    end
+                end
+                if RodMaterials[rodName]['handle'] and RodColors[rodName]['handle'] then
+                    rod['handle'].Material = RodMaterials[rodName]['handle']
+                    rod['handle'].Color = RodColors[rodName]['handle']
                 end
             end
         end
     end
     if flags['bodyrodchams'] then
-        for i,v in pairs(getchar():GetChildren()) do
-            if v:IsA('Tool') and FindChild(v, 'Details') then
-                local rodColor = flags['rodcolor'] or Color3.new(1, 0, 0)
-                local rodMaterial = flags['rodmaterial'] or 'ForceField'
-                for x,z in pairs(v.Details:GetChildren()) do
-                    if z.ClassName == 'MeshPart' then
-                        z.Color = rodColor
-                        z.Material = rodMaterial
+        local rod = getchar():FindFirstChild('RodBodyModel')
+        if rod ~= nil and FindChild(rod, 'Details') then
+            local rodName = tostring(rod)
+            if not RodColors[rodName] then
+                RodColors[rodName] = {}
+                RodMaterials[rodName] = {}
+            end
+            for i,v in rod['Details']:GetDescendants() do
+                if v:IsA('BasePart') or v:IsA('MeshPart') then
+                    if v.Color ~= Color3.fromRGB(100, 100, 255) then
+                        RodColors[rodName][v.Name..i] = v.Color
                     end
+                    if RodMaterials[rodName][v.Name..i] == nil then
+                        if v.Material == Enum.Material.Neon then
+                            RodMaterials[rodName][v.Name..i] = Enum.Material.Neon
+                        elseif v.Material ~= Enum.Material.ForceField and v.Material ~= Enum.Material[flags['rodmaterial']] then
+                            RodMaterials[rodName][v.Name..i] = v.Material
+                        end
+                    end
+                    v.Material = Enum.Material[flags['rodmaterial']]
+                    v.Color = Color3.fromRGB(100, 100, 255)
                 end
             end
+            if rod['handle'].Color ~= Color3.fromRGB(100, 100, 255) then
+                RodColors[rodName]['handle'] = rod['handle'].Color
+            end
+            if rod['handle'].Material ~= Enum.Material.ForceField and rod['handle'].Material ~= Enum.Material.Neon and rod['handle'].Material ~= Enum.Material[flags['rodmaterial']] then
+                RodMaterials[rodName]['handle'] = rod['handle'].Material
+            end
+            rod['handle'].Material = Enum.Material[flags['rodmaterial']]
+            rod['handle'].Color = Color3.fromRGB(100, 100, 255)
         end
     elseif not flags['bodyrodchams'] then
-        for i,v in pairs(getchar():GetChildren()) do
-            if v:IsA('Tool') and FindChild(v, 'Details') then
-                for x,z in pairs(v.Details:GetChildren()) do
-                    if z.ClassName == 'MeshPart' then
-                        z.Color = Color3.fromRGB(139, 138, 133)
-                        z.Material = 'Metal'
+        local rod = getchar():FindFirstChild('RodBodyModel')
+        if rod ~= nil and FindChild(rod, 'Details') then
+            local rodName = tostring(rod)
+            if RodColors[rodName] and RodMaterials[rodName] then
+                for i,v in rod['Details']:GetDescendants() do
+                    if v:IsA('BasePart') or v:IsA('MeshPart') then
+                        if RodMaterials[rodName][v.Name..i] and RodColors[rodName][v.Name..i] then
+                            v.Material = RodMaterials[rodName][v.Name..i]
+                            v.Color = RodColors[rodName][v.Name..i]
+                        end
                     end
+                end
+                if RodMaterials[rodName]['handle'] and RodColors[rodName]['handle'] then
+                    rod['handle'].Material = RodMaterials[rodName]['handle']
+                    rod['handle'].Color = RodColors[rodName]['handle']
                 end
             end
         end
     end
     if flags['fishabundance'] then
-        if FindChild(lp.PlayerGui, 'FishDetect') then
-            lp.PlayerGui.FishDetect.Enabled = true
-            fishabundancevisible = true
+        if not fishabundancevisible then
+            message('\<b><font color = \"#9eff80\">Fish Abundance Zones</font></b>\ are now visible', 5)
         end
+        for i,v in workspace.zones.fishing:GetChildren() do
+            if FindChildOfType(v, 'Abundance', 'StringValue') and FindChildOfType(v, 'radar1', 'BillboardGui') then
+                v['radar1'].Enabled = true
+                v['radar2'].Enabled = true
+            end
+        end
+        fishabundancevisible = flags['fishabundance']
     else
-        if FindChild(lp.PlayerGui, 'FishDetect') then
-            lp.PlayerGui.FishDetect.Enabled = false
-            fishabundancevisible = false
+        if fishabundancevisible then
+            message('\<b><font color = \"#9eff80\">Fish Abundance Zones</font></b>\ are no longer visible', 5)
         end
+        for i,v in workspace.zones.fishing:GetChildren() do
+            if FindChildOfType(v, 'Abundance', 'StringValue') and FindChildOfType(v, 'radar1', 'BillboardGui') then
+                v['radar1'].Enabled = false
+                v['radar2'].Enabled = false
+            end
+        end
+        fishabundancevisible = flags['fishabundance']
     end
 
     -- Modifications
     if flags['infoxygen'] then
-        if FindChild(lp.PlayerGui, 'oxygen') and FindChild(lp.PlayerGui['oxygen'], 'overlay') then
-            lp.PlayerGui.oxygen.overlay.Visible = false
+        if not deathcon then
+            deathcon = gethum().Died:Connect(function()
+                task.delay(9, function()
+                    if FindChildOfType(getchar(), 'DivingTank', 'Decal') then
+                        FindChildOfType(getchar(), 'DivingTank', 'Decal'):Destroy()
+                    end
+                    local oxygentank = Instance.new('Decal')
+                    oxygentank.Name = 'DivingTank'
+                    oxygentank.Parent = workspace
+                    oxygentank:SetAttribute('Tier', 1/0)
+                    oxygentank.Parent = getchar()
+                    deathcon = nil
+                end)
+            end)
+        end
+        if deathcon and gethum().Health > 0 then
+            if not getchar():FindFirstChild('DivingTank') then
+                local oxygentank = Instance.new('Decal')
+                oxygentank.Name = 'DivingTank'
+                oxygentank.Parent = workspace
+                oxygentank:SetAttribute('Tier', 1/0)
+                oxygentank.Parent = getchar()
+            end
         end
     else
-        if FindChild(lp.PlayerGui, 'oxygen') and FindChild(lp.PlayerGui['oxygen'], 'overlay') then
-            lp.PlayerGui.oxygen.overlay.Visible = true
+        if FindChildOfType(getchar(), 'DivingTank', 'Decal') then
+            FindChildOfType(getchar(), 'DivingTank', 'Decal'):Destroy()
         end
     end
     if flags['nopeakssystems'] then
+        getchar():SetAttribute('WinterCloakEquipped', true)
         getchar():SetAttribute('Refill', true)
     else
+        getchar():SetAttribute('WinterCloakEquipped', nil)
         getchar():SetAttribute('Refill', false)
     end
 end)
@@ -1189,23 +842,18 @@ end)
 --// Hooks
 if CheckFunc(hookmetamethod) then
     local old; old = hookmetamethod(game, "__namecall", function(self, ...)
-        local args = {...}
-        local method = getnamecallmethod()
-        
-        if flags['noafk'] and method == 'kick' then
-            return
-        end
-        
-        if flags['perfectcast'] and method == 'FireServer' and tostring(self) == 'cast' then
+        local method, args = getnamecallmethod(), {...}
+        if method == 'FireServer' and self.Name == 'afk' and flags['noafk'] then
+            args[1] = false
+            return old(self, unpack(args))
+        elseif method == 'FireServer' and self.Name == 'cast' and flags['perfectcast'] then
             args[1] = 100
-            args[2] = 1
-        end
-        
-        if flags['alwayscatch'] and method == 'FireServer' and tostring(self) == 'reelfinished' then
+            return old(self, unpack(args))
+        elseif method == 'FireServer' and self.Name == 'reelfinished' and flags['alwayscatch'] then
             args[1] = 100
             args[2] = true
+            return old(self, unpack(args))
         end
-        
-        return old(self, unpack(args))
+        return old(self, ...)
     end)
 end
