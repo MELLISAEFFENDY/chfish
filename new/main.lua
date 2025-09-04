@@ -278,6 +278,7 @@ local library
 local Window
 local isMinimized = false
 local floatingButton = nil
+local LibName = "FischScript" .. tostring(math.random(1, 100000))
 
 -- Load Kavo UI from GitHub repository or local file
 local kavoUrl = 'https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/new/Kavo.lua'
@@ -330,6 +331,9 @@ if not success or not library then
                 end
                 function section:NewButton(name, desc, callback)
                     -- Button functionality
+                end
+                function section:NewSlider(name, desc, min, max, default, callback)
+                    if callback then callback(default) end
                 end
                 return section
             end
@@ -488,13 +492,6 @@ local function addMinimizeButton()
     
     -- Hover effects
     minimizeBtn.MouseEnter:Connect(function()
-        minimizeBtn.BackgroundColor3 = Color3.fromRGB(94, 119, 155)
-    end)
-    
-    minimizeBtn.MouseLeave:Connect(function()
-        minimizeBtn.BackgroundColor3 = Color3.fromRGB(74, 99, 135)
-    end)
-end
         minimizeBtn.BackgroundColor3 = Color3.fromRGB(94, 119, 155)
     end)
     
@@ -774,169 +771,76 @@ RunService.Heartbeat:Connect(function()
     if flags['rodchams'] then
         local rod = FindRod()
         if rod ~= nil and FindChild(rod, 'Details') then
-            local rodName = tostring(rod)
-            if not RodColors[rodName] then
-                RodColors[rodName] = {}
-                RodMaterials[rodName] = {}
-            end
-            for i,v in rod['Details']:GetDescendants() do
-                if v:IsA('BasePart') or v:IsA('MeshPart') then
-                    if v.Color ~= Color3.fromRGB(100, 100, 255) then
-                        RodColors[rodName][v.Name..i] = v.Color
-                    end
-                    if RodMaterials[rodName][v.Name..i] == nil then
-                        if v.Material == Enum.Material.Neon then
-                            RodMaterials[rodName][v.Name..i] = Enum.Material.Neon
-                        elseif v.Material ~= Enum.Material.ForceField and v.Material ~= Enum.Material[flags['rodmaterial']] then
-                            RodMaterials[rodName][v.Name..i] = v.Material
-                        end
-                    end
-                    v.Material = Enum.Material[flags['rodmaterial']]
-                    v.Color = Color3.fromRGB(100, 100, 255)
+            local rodColor = flags['rodcolor'] or Color3.new(1, 0, 0)
+            local rodMaterial = flags['rodmaterial'] or 'ForceField'
+            for i,v in pairs(rod.Details:GetChildren()) do
+                if v.ClassName == 'MeshPart' then
+                    v.Color = rodColor
+                    v.Material = rodMaterial
                 end
             end
-            if rod['handle'].Color ~= Color3.fromRGB(100, 100, 255) then
-                RodColors[rodName]['handle'] = rod['handle'].Color
-            end
-            if rod['handle'].Material ~= Enum.Material.ForceField and rod['handle'].Material ~= Enum.Material.Neon and rod['handle'].Material ~= Enum.Material[flags['rodmaterial']] then
-                RodMaterials[rodName]['handle'] = rod['handle'].Material
-            end
-            rod['handle'].Material = Enum.Material[flags['rodmaterial']]
-            rod['handle'].Color = Color3.fromRGB(100, 100, 255)
         end
     elseif not flags['rodchams'] then
         local rod = FindRod()
         if rod ~= nil and FindChild(rod, 'Details') then
-            local rodName = tostring(rod)
-            if RodColors[rodName] and RodMaterials[rodName] then
-                for i,v in rod['Details']:GetDescendants() do
-                    if v:IsA('BasePart') or v:IsA('MeshPart') then
-                        if RodMaterials[rodName][v.Name..i] and RodColors[rodName][v.Name..i] then
-                            v.Material = RodMaterials[rodName][v.Name..i]
-                            v.Color = RodColors[rodName][v.Name..i]
-                        end
-                    end
-                end
-                if RodMaterials[rodName]['handle'] and RodColors[rodName]['handle'] then
-                    rod['handle'].Material = RodMaterials[rodName]['handle']
-                    rod['handle'].Color = RodColors[rodName]['handle']
+            for i,v in pairs(rod.Details:GetChildren()) do
+                if v.ClassName == 'MeshPart' then
+                    v.Color = Color3.fromRGB(139, 138, 133)
+                    v.Material = 'Metal'
                 end
             end
         end
     end
     if flags['bodyrodchams'] then
-        local rod = getchar():FindFirstChild('RodBodyModel')
-        if rod ~= nil and FindChild(rod, 'Details') then
-            local rodName = tostring(rod)
-            if not RodColors[rodName] then
-                RodColors[rodName] = {}
-                RodMaterials[rodName] = {}
-            end
-            for i,v in rod['Details']:GetDescendants() do
-                if v:IsA('BasePart') or v:IsA('MeshPart') then
-                    if v.Color ~= Color3.fromRGB(100, 100, 255) then
-                        RodColors[rodName][v.Name..i] = v.Color
+        for i,v in pairs(getchar():GetChildren()) do
+            if v:IsA('Tool') and FindChild(v, 'Details') then
+                local rodColor = flags['rodcolor'] or Color3.new(1, 0, 0)
+                local rodMaterial = flags['rodmaterial'] or 'ForceField'
+                for x,z in pairs(v.Details:GetChildren()) do
+                    if z.ClassName == 'MeshPart' then
+                        z.Color = rodColor
+                        z.Material = rodMaterial
                     end
-                    if RodMaterials[rodName][v.Name..i] == nil then
-                        if v.Material == Enum.Material.Neon then
-                            RodMaterials[rodName][v.Name..i] = Enum.Material.Neon
-                        elseif v.Material ~= Enum.Material.ForceField and v.Material ~= Enum.Material[flags['rodmaterial']] then
-                            RodMaterials[rodName][v.Name..i] = v.Material
-                        end
-                    end
-                    v.Material = Enum.Material[flags['rodmaterial']]
-                    v.Color = Color3.fromRGB(100, 100, 255)
                 end
             end
-            if rod['handle'].Color ~= Color3.fromRGB(100, 100, 255) then
-                RodColors[rodName]['handle'] = rod['handle'].Color
-            end
-            if rod['handle'].Material ~= Enum.Material.ForceField and rod['handle'].Material ~= Enum.Material.Neon and rod['handle'].Material ~= Enum.Material[flags['rodmaterial']] then
-                RodMaterials[rodName]['handle'] = rod['handle'].Material
-            end
-            rod['handle'].Material = Enum.Material[flags['rodmaterial']]
-            rod['handle'].Color = Color3.fromRGB(100, 100, 255)
         end
     elseif not flags['bodyrodchams'] then
-        local rod = getchar():FindFirstChild('RodBodyModel')
-        if rod ~= nil and FindChild(rod, 'Details') then
-            local rodName = tostring(rod)
-            if RodColors[rodName] and RodMaterials[rodName] then
-                for i,v in rod['Details']:GetDescendants() do
-                    if v:IsA('BasePart') or v:IsA('MeshPart') then
-                        if RodMaterials[rodName][v.Name..i] and RodColors[rodName][v.Name..i] then
-                            v.Material = RodMaterials[rodName][v.Name..i]
-                            v.Color = RodColors[rodName][v.Name..i]
-                        end
+        for i,v in pairs(getchar():GetChildren()) do
+            if v:IsA('Tool') and FindChild(v, 'Details') then
+                for x,z in pairs(v.Details:GetChildren()) do
+                    if z.ClassName == 'MeshPart' then
+                        z.Color = Color3.fromRGB(139, 138, 133)
+                        z.Material = 'Metal'
                     end
-                end
-                if RodMaterials[rodName]['handle'] and RodColors[rodName]['handle'] then
-                    rod['handle'].Material = RodMaterials[rodName]['handle']
-                    rod['handle'].Color = RodColors[rodName]['handle']
                 end
             end
         end
     end
     if flags['fishabundance'] then
-        if not fishabundancevisible then
-            message('\<b><font color = \"#9eff80\">Fish Abundance Zones</font></b>\ are now visible', 5)
+        if FindChild(lp.PlayerGui, 'FishDetect') then
+            lp.PlayerGui.FishDetect.Enabled = true
+            fishabundancevisible = true
         end
-        for i,v in workspace.zones.fishing:GetChildren() do
-            if FindChildOfType(v, 'Abundance', 'StringValue') and FindChildOfType(v, 'radar1', 'BillboardGui') then
-                v['radar1'].Enabled = true
-                v['radar2'].Enabled = true
-            end
-        end
-        fishabundancevisible = flags['fishabundance']
     else
-        if fishabundancevisible then
-            message('\<b><font color = \"#9eff80\">Fish Abundance Zones</font></b>\ are no longer visible', 5)
+        if FindChild(lp.PlayerGui, 'FishDetect') then
+            lp.PlayerGui.FishDetect.Enabled = false
+            fishabundancevisible = false
         end
-        for i,v in workspace.zones.fishing:GetChildren() do
-            if FindChildOfType(v, 'Abundance', 'StringValue') and FindChildOfType(v, 'radar1', 'BillboardGui') then
-                v['radar1'].Enabled = false
-                v['radar2'].Enabled = false
-            end
-        end
-        fishabundancevisible = flags['fishabundance']
     end
 
     -- Modifications
     if flags['infoxygen'] then
-        if not deathcon then
-            deathcon = gethum().Died:Connect(function()
-                task.delay(9, function()
-                    if FindChildOfType(getchar(), 'DivingTank', 'Decal') then
-                        FindChildOfType(getchar(), 'DivingTank', 'Decal'):Destroy()
-                    end
-                    local oxygentank = Instance.new('Decal')
-                    oxygentank.Name = 'DivingTank'
-                    oxygentank.Parent = workspace
-                    oxygentank:SetAttribute('Tier', 1/0)
-                    oxygentank.Parent = getchar()
-                    deathcon = nil
-                end)
-            end)
-        end
-        if deathcon and gethum().Health > 0 then
-            if not getchar():FindFirstChild('DivingTank') then
-                local oxygentank = Instance.new('Decal')
-                oxygentank.Name = 'DivingTank'
-                oxygentank.Parent = workspace
-                oxygentank:SetAttribute('Tier', 1/0)
-                oxygentank.Parent = getchar()
-            end
+        if FindChild(lp.PlayerGui, 'oxygen') and FindChild(lp.PlayerGui['oxygen'], 'overlay') then
+            lp.PlayerGui.oxygen.overlay.Visible = false
         end
     else
-        if FindChildOfType(getchar(), 'DivingTank', 'Decal') then
-            FindChildOfType(getchar(), 'DivingTank', 'Decal'):Destroy()
+        if FindChild(lp.PlayerGui, 'oxygen') and FindChild(lp.PlayerGui['oxygen'], 'overlay') then
+            lp.PlayerGui.oxygen.overlay.Visible = true
         end
     end
     if flags['nopeakssystems'] then
-        getchar():SetAttribute('WinterCloakEquipped', true)
         getchar():SetAttribute('Refill', true)
     else
-        getchar():SetAttribute('WinterCloakEquipped', nil)
         getchar():SetAttribute('Refill', false)
     end
 end)
@@ -944,18 +848,23 @@ end)
 --// Hooks
 if CheckFunc(hookmetamethod) then
     local old; old = hookmetamethod(game, "__namecall", function(self, ...)
-        local method, args = getnamecallmethod(), {...}
-        if method == 'FireServer' and self.Name == 'afk' and flags['noafk'] then
-            args[1] = false
-            return old(self, unpack(args))
-        elseif method == 'FireServer' and self.Name == 'cast' and flags['perfectcast'] then
+        local args = {...}
+        local method = getnamecallmethod()
+        
+        if flags['noafk'] and method == 'kick' then
+            return
+        end
+        
+        if flags['perfectcast'] and method == 'FireServer' and tostring(self) == 'cast' then
             args[1] = 100
-            return old(self, unpack(args))
-        elseif method == 'FireServer' and self.Name == 'reelfinished' and flags['alwayscatch'] then
+            args[2] = 1
+        end
+        
+        if flags['alwayscatch'] and method == 'FireServer' and tostring(self) == 'reelfinished' then
             args[1] = 100
             args[2] = true
-            return old(self, unpack(args))
         end
-        return old(self, ...)
+        
+        return old(self, unpack(args))
     end)
 end
