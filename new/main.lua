@@ -31,20 +31,199 @@ local TeleportLocations = {
         ['Frigid Cavern'] = CFrame.new(20253.6094, 756.525818, 5772.68555, -0.781508088, 1.85673343e-08, 0.623895109, 5.92671467e-09, 1, -2.23363816e-08, -0.623895109, -1.3758414e-08, -0.781508088),
         ['Cryogenic Canal'] = CFrame.new(19958.5176, 917.195923, 5332.59375, 0.758922458, -7.29783434e-09, 0.651180983, -4.58880756e-09, 1, 1.65551253e-08, -0.651180983, -1.55522013e-08, 0.758922458),
         ['Glacial Grotto'] = CFrame.new(20003.0273, 1136.42798, 5555.95996, 0.983130038, -3.94455064e-08, 0.182907909, 3.45229765e-08, 1, 3.0096718e-08, -0.182907909, -2.32744615e-08, 0.983130038),
-        ["Keeper's Altar"] = CFrame.new(1297.92285, -805.292236, -284.155823, -0.99758029, 5.80044706e-08, -0.0695239156, 6.16549869e-08, 1, -5.03615105e-08, 0.0695239156, -5.45261436e-08, -0.99758029)
+        ["Keeper's Altar"] = CFrame.new(1297.92285, -805.292236, -284.155823, -0.99758029, 5.80044706e-08, -0.0695239156, 6.16549869e-08, 1, -5.03615105e-08, 0.0695239156, -5.45261436e-08, -0.99758029),
+        ['Atlantis'] = CFrame.new(-4465, -604, 1874)
     },
     ['Rods'] = {
         ['Heaven Rod'] = CFrame.new(20025.0508, -467.665955, 7114.40234, -0.9998191, -2.41349773e-10, 0.0190212391, -4.76249762e-10, 1, -1.23448247e-08, -0.0190212391, -1.23516495e-08, -0.9998191),
         ['Summit Rod'] = CFrame.new(20213.334, 736.668823, 5707.8208, -0.274440169, 3.53429606e-08, 0.961604178, -1.52819659e-08, 1, -4.11156122e-08, -0.961604178, -2.59789772e-08, -0.274440169),
-        ['Kings Rod'] = CFrame.new(1380.83862, -807.198608, -304.22229, -0.692510426, 9.24755454e-08, 0.72140789, 4.86611427e-08, 1, -8.1475676e-08, -0.72140789, -2.13182219e-08, -0.692510426)
+        ['Kings Rod'] = CFrame.new(1380.83862, -807.198608, -304.22229, -0.692510426, 9.24755454e-08, 0.72140789, 4.86611427e-08, 1, -8.1475676e-08, -0.72140789, -2.13182219e-08, -0.692510426),
+        ['Training Rod'] = CFrame.new(465, 150, 235),
+        ['Long Rod'] = CFrame.new(480, 180, 150),
+        ['Fortune Rod'] = CFrame.new(-1515, 141, 765),
+        ['Depthseeker Rod'] = CFrame.new(-4465, -604, 1874),
+        ['Champions Rod'] = CFrame.new(-4277, -606, 1838),
+        ['Tempest Rod'] = CFrame.new(-4928, -595, 1857),
+        ['Abyssal Specter Rod'] = CFrame.new(-3804, -567, 1870),
+        ['Poseidon Rod'] = CFrame.new(-4086, -559, 895),
+        ['Zeus Rod'] = CFrame.new(-4272, -629, 2665),
+        ['Kraken Rod'] = CFrame.new(-4415, -997, 2055),
+        ['Reinforced Rod'] = CFrame.new(-975, -245, -2700),
+        ['Trident Rod'] = CFrame.new(-1485, -225, -2195),
+        ['Scurvy Rod'] = CFrame.new(-2830, 215, 1510),
+        ['Stone Rod'] = CFrame.new(5487, 143, -316),
+        ['Magnet Rod'] = CFrame.new(-200, 130, 1930)
+    },
+    ['Items'] = {
+        ['Fish Radar'] = CFrame.new(365, 135, 275),
+        ['Basic Diving Gear'] = CFrame.new(370, 135, 250),
+        ['Bait Crate (Moosewood)'] = CFrame.new(315, 135, 335),
+        ['Meteor Totem'] = CFrame.new(-1945, 275, 230),
+        ['Glider'] = CFrame.new(-1710, 150, 740),
+        ['Bait Crate (Roslit)'] = CFrame.new(-1465, 130, 680),
+        ['Crab Cage (Roslit)'] = CFrame.new(-1485, 130, 640),
+        ['Poseidon Wrath Totem'] = CFrame.new(-3953, -556, 853),
+        ['Zeus Storm Totem'] = CFrame.new(-4325, -630, 2687),
+        ['Quality Bait Crate (Atlantis)'] = CFrame.new(-177, 144, 1933),
+        ['Flippers'] = CFrame.new(-4462, -605, 1875),
+        ['Super Flippers'] = CFrame.new(-4463, -603, 1876),
+        ['Advanced Diving Gear (Atlantis)'] = CFrame.new(-4452, -603, 1877),
+        ['Conception Conch (Atlantis)'] = CFrame.new(-4450, -605, 1874),
+        ['Advanced Diving Gear (Desolate)'] = CFrame.new(-790, 125, -3100),
+        ['Basic Diving Gear (Desolate)'] = CFrame.new(-1655, -210, -2825),
+        ['Tidebreaker'] = CFrame.new(-1645, -210, -2855),
+        ['Conception Conch (Desolate)'] = CFrame.new(-1630, -210, -2860),
+        ['Aurora Totem'] = CFrame.new(-1800, -135, -3280),
+        ['Bait Crate (Forsaken)'] = CFrame.new(-2490, 130, 1535),
+        ['Crab Cage (Forsaken)'] = CFrame.new(-2525, 135, -1575),
+        ['Eclipse Totem'] = CFrame.new(5966, 274, 846),
+        ['Bait Crate (Ancient)'] = CFrame.new(6075, 195, 260),
+        ['Smokescreen Totem'] = CFrame.new(2790, 140, -625),
+        ['Crab Cage (Mushgrove)'] = CFrame.new(2520, 135, -895),
+        ['Windset Totem'] = CFrame.new(2845, 180, 2700),
+        ['Sundial Totem'] = CFrame.new(-1145, 135, -1075),
+        ['Bait Crate (Sunstone)'] = CFrame.new(-1045, 200, -1100),
+        ['Crab Cage (Sunstone)'] = CFrame.new(-920, 130, -1105),
+        ['Quality Bait Crate (Terrapin)'] = CFrame.new(-175, 145, 1935),
+        ['Tempest Totem'] = CFrame.new(35, 130, 1945)
+    },
+    ['Fishing Spots'] = {
+        ['Trout Spot'] = CFrame.new(390, 132, 345),
+        ['Anchovy Spot'] = CFrame.new(130, 135, 630),
+        ['Yellowfin Tuna Spot'] = CFrame.new(705, 136, 340),
+        ['Carp Spot'] = CFrame.new(560, 145, 600),
+        ['Goldfish Spot'] = CFrame.new(525, 145, 310),
+        ['Flounder Spot'] = CFrame.new(285, 133, 215),
+        ['Pike Spot'] = CFrame.new(540, 145, 330),
+        ['Perch Spot'] = CFrame.new(-1805, 140, 595),
+        ['Blue Tang Spot'] = CFrame.new(-1465, 125, 525),
+        ['Clownfish Spot'] = CFrame.new(-1520, 125, 520),
+        ['Clam Spot'] = CFrame.new(-2028, 130, 541),
+        ['Angelfish Spot'] = CFrame.new(-1500, 135, 615),
+        ['Arapaima Spot'] = CFrame.new(-1765, 140, 600),
+        ['Suckermouth Catfish Spot'] = CFrame.new(-1800, 140, 620),
+        ['Phantom Ray Spot'] = CFrame.new(-1685, -235, -3090),
+        ['Cockatoo Squid Spot'] = CFrame.new(-1645, -205, -2790),
+        ['Banditfish Spot'] = CFrame.new(-1500, -235, -2855),
+        ['Scurvy Sailfish Spot'] = CFrame.new(-2430, 130, 1450),
+        ['Cutlass Fish Spot'] = CFrame.new(-2645, 130, 1410),
+        ['Shipwreck Barracuda Spot'] = CFrame.new(-3597, 140, 1604),
+        ['Golden Seahorse Spot'] = CFrame.new(-3100, 127, 1450),
+        ['Anomalocaris Spot'] = CFrame.new(5504, 143, -321),
+        ['Cobia Spot'] = CFrame.new(5983, 125, 1007),
+        ['Hallucigenia Spot'] = CFrame.new(6015, 190, 339),
+        ['Leedsichthys Spot'] = CFrame.new(6052, 394, 648),
+        ['Deep Sea Fragment Spot'] = CFrame.new(5841, 81, 388),
+        ['Solar Fragment Spot'] = CFrame.new(6073, 443, 684),
+        ['Earth Fragment Spot'] = CFrame.new(5972, 274, 845),
+        ['White Perch Spot'] = CFrame.new(2475, 125, -675),
+        ['Grey Carp Spot'] = CFrame.new(2665, 125, -815),
+        ['Bowfin Spot'] = CFrame.new(2445, 125, -795),
+        ['Marsh Gar Spot'] = CFrame.new(2520, 125, -815),
+        ['Alligator Spot'] = CFrame.new(2670, 130, -710),
+        ['Pollock Spot'] = CFrame.new(2550, 135, 2385),
+        ['Bluegill Spot'] = CFrame.new(3070, 130, 2600),
+        ['Herring Spot'] = CFrame.new(2595, 140, 2500),
+        ['Red Drum Spot'] = CFrame.new(2310, 135, 2545),
+        ['Arctic Char Spot'] = CFrame.new(2350, 130, 2230),
+        ['Lingcod Spot'] = CFrame.new(2820, 125, 2805),
+        ['Glacierfish Spot'] = CFrame.new(2860, 135, 2620),
+        ['Sweetfish Spot'] = CFrame.new(-940, 130, -1105),
+        ['Glassfish Spot'] = CFrame.new(-905, 130, -1000),
+        ['Longtail Bass Spot'] = CFrame.new(-860, 135, -1205),
+        ['Red Tang Spot'] = CFrame.new(-1195, 123, -1220),
+        ['Chinfish Spot'] = CFrame.new(-625, 130, -950),
+        ['Trumpetfish Spot'] = CFrame.new(-790, 125, -1340),
+        ['Mahi Mahi Spot'] = CFrame.new(-730, 130, -1350),
+        ['Sunfish Spot'] = CFrame.new(-975, 125, -1430),
+        ['Walleye Spot'] = CFrame.new(-225, 125, 2150),
+        ['White Bass Spot'] = CFrame.new(-50, 130, 2025),
+        ['Redeye Bass Spot'] = CFrame.new(-35, 125, 2285),
+        ['Chinook Salmon Spot'] = CFrame.new(-305, 125, 1625),
+        ['Golden Smallmouth Bass Spot'] = CFrame.new(65, 135, 2140),
+        ['Olm Spot'] = CFrame.new(95, 125, 1980)
+    },
+    ['NPCs'] = {
+        ['Angler'] = CFrame.new(480, 150, 295),
+        ['Appraiser'] = CFrame.new(445, 150, 210),
+        ['Arnold'] = CFrame.new(320, 134, 264),
+        ['Bob'] = CFrame.new(420, 145, 260),
+        ['Brickford Masterson'] = CFrame.new(412, 132, 365),
+        ['Captain Ahab'] = CFrame.new(441, 135, 358),
+        ['Challenges'] = CFrame.new(337, 138, 312),
+        ['Clover McRich'] = CFrame.new(345, 136, 330),
+        ['Daisy'] = CFrame.new(580, 165, 220),
+        ['Dr. Blackfin'] = CFrame.new(355, 136, 329),
+        ['Egg Salesman'] = CFrame.new(404, 135, 312),
+        ['Harry Fischer'] = CFrame.new(396, 134, 381),
+        ['Henry'] = CFrame.new(484, 152, 236),
+        ['Inn Keeper'] = CFrame.new(490, 150, 245),
+        ['Lucas'] = CFrame.new(450, 180, 175),
+        ['Marlon Friend'] = CFrame.new(405, 135, 248),
+        ['Merchant'] = CFrame.new(465, 150, 230),
+        ['Paul'] = CFrame.new(382, 137, 347),
+        ['Phineas'] = CFrame.new(470, 150, 275),
+        ['Pierre'] = CFrame.new(390, 135, 200),
+        ['Pilgrim'] = CFrame.new(402, 134, 257),
+        ['Ringo'] = CFrame.new(410, 135, 235),
+        ['Shipwright'] = CFrame.new(360, 135, 260),
+        ['Skin Merchant'] = CFrame.new(415, 135, 194),
+        ['Smurfette'] = CFrame.new(334, 135, 327),
+        ['Tom Elf'] = CFrame.new(404, 136, 317),
+        ['Witch'] = CFrame.new(410, 135, 310),
+        ['Wren'] = CFrame.new(368, 135, 286),
+        ['Mike'] = CFrame.new(210, 115, 640),
+        ['Ryder Vex'] = CFrame.new(233, 116, 746),
+        ['Ocean'] = CFrame.new(1230, 125, 575),
+        ['Lars Timberjaw'] = CFrame.new(1217, 87, 574),
+        ['Sporey'] = CFrame.new(1245, 86, 425),
+        ['Sporey Mom'] = CFrame.new(1262, 129, 663),
+        ['Oscar IV'] = CFrame.new(1392, 116, 493),
+        ['Angus McBait'] = CFrame.new(236, 222, 461),
+        ['Waveborne'] = CFrame.new(360, 90, 780),
+        ['Boone Tiller'] = CFrame.new(390, 87, 764),
+        ['Clark'] = CFrame.new(443, 84, 703),
+        ['Jak'] = CFrame.new(474, 84, 758),
+        ['Willow'] = CFrame.new(501, 134, 125),
+        ['Marley'] = CFrame.new(505, 134, 120),
+        ['Sage'] = CFrame.new(513, 134, 125),
+        ['Meteoriticist'] = CFrame.new(5922, 262, 596),
+        ['Chiseler'] = CFrame.new(6087, 195, 294),
+        ['Sea Traveler'] = CFrame.new(140, 150, 2030),
+        ['Wilson'] = CFrame.new(2935, 280, 2565),
+        ['Agaric'] = CFrame.new(2931, 4268, 3039),
+        ['Sunken Chest'] = CFrame.new(798, 130, 1667),
+        ['Daily Shopkeeper'] = CFrame.new(229, 139, 42),
+        ['AFK Rewards'] = CFrame.new(233, 139, 38),
+        ['Travelling Merchant'] = CFrame.new(2, 500, 0),
+        ['Silas'] = CFrame.new(1545, 1690, 6310),
+        ['Nick'] = CFrame.new(50, 0, 0),
+        ['Hollow'] = CFrame.new(25, 0, 0),
+        ['Shopper Girl'] = CFrame.new(1000, 140, 9932),
+        ['Sandy Finn'] = CFrame.new(1015, 140, 9911),
+        ['Red NPC'] = CFrame.new(1020, 173, 9857),
+        ['Thomas'] = CFrame.new(1062, 140, 9890),
+        ['Shawn'] = CFrame.new(1068, 157, 9918),
+        ['Axel'] = CFrame.new(883, 132, 9905),
+        ['Joey'] = CFrame.new(906, 132, 9962),
+        ['Jett'] = CFrame.new(925, 131, 9883),
+        ['Lucas (Fischfest)'] = CFrame.new(946, 132, 9894),
+        ['Shell Merchant'] = CFrame.new(972, 132, 9921),
+        ['Barnacle Bill'] = CFrame.new(989, 143, 9975)
     }
 }
 local ZoneNames = {}
 local RodNames = {}
+local ItemNames = {}
+local FishingSpotNames = {}
+local NPCNames = {}
 local RodColors = {}
 local RodMaterials = {}
 for i,v in pairs(TeleportLocations['Zones']) do table.insert(ZoneNames, i) end
 for i,v in pairs(TeleportLocations['Rods']) do table.insert(RodNames, i) end
+for i,v in pairs(TeleportLocations['Items']) do table.insert(ItemNames, i) end
+for i,v in pairs(TeleportLocations['Fishing Spots']) do table.insert(FishingSpotNames, i) end
+for i,v in pairs(TeleportLocations['NPCs']) do table.insert(NPCNames, i) end
 
 --// Functions
 FindChildOfClass = function(parent, classname)
@@ -91,6 +270,10 @@ end
 
 --// UI
 local library
+local Window
+local isMinimized = false
+local floatingButton = nil
+
 -- Load Kavo UI from GitHub repository or local file
 local kavoUrl = 'https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/new/Kavo.lua'
 
@@ -151,8 +334,164 @@ if not success or not library then
     end
 end
 
+-- Function to create floating button
+local function createFloatingButton()
+    if floatingButton then return end
+    
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "FischFloatingButton"
+    screenGui.ResetOnSpawn = false
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    
+    local frame = Instance.new("Frame")
+    frame.Name = "FloatingFrame"
+    frame.Size = UDim2.new(0, 60, 0, 60)
+    frame.Position = UDim2.new(1, -80, 0, 20)
+    frame.BackgroundColor3 = Color3.fromRGB(45, 65, 95)
+    frame.BorderSizePixel = 0
+    frame.Parent = screenGui
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 30)
+    corner.Parent = frame
+    
+    local button = Instance.new("TextButton")
+    button.Name = "MinimizeButton"
+    button.Size = UDim2.new(1, 0, 1, 0)
+    button.Position = UDim2.new(0, 0, 0, 0)
+    button.BackgroundTransparency = 1
+    button.Text = "🎣"
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 24
+    button.Font = Enum.Font.SourceSansBold
+    button.Parent = frame
+    
+    -- Gradient
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(74, 99, 135)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(45, 65, 95))
+    }
+    gradient.Rotation = 45
+    gradient.Parent = frame
+    
+    -- Shadow effect
+    local shadow = Instance.new("Frame")
+    shadow.Name = "Shadow"
+    shadow.Size = UDim2.new(1, 6, 1, 6)
+    shadow.Position = UDim2.new(0, -3, 0, -3)
+    shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    shadow.BackgroundTransparency = 0.7
+    shadow.ZIndex = frame.ZIndex - 1
+    shadow.Parent = frame
+    
+    local shadowCorner = Instance.new("UICorner")
+    shadowCorner.CornerRadius = UDim.new(0, 30)
+    shadowCorner.Parent = shadow
+    
+    -- Click event
+    button.MouseButton1Click:Connect(function()
+        if isMinimized then
+            -- Show main UI
+            local mainFrame = lp.PlayerGui:FindFirstChild("Kavo"):FindFirstChild("Main")
+            if mainFrame then
+                mainFrame.Visible = true
+                isMinimized = false
+                screenGui:Destroy()
+                floatingButton = nil
+            end
+        end
+    end)
+    
+    -- Dragging functionality
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
+    
+    button.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+        end
+    end)
+    
+    button.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    
+    button.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    -- Add to CoreGui or PlayerGui
+    if syn and syn.protect_gui then
+        syn.protect_gui(screenGui)
+        screenGui.Parent = game.CoreGui
+    else
+        screenGui.Parent = lp.PlayerGui
+    end
+    
+    floatingButton = screenGui
+end
+
+-- Function to add minimize button to main UI
+local function addMinimizeButton()
+    task.wait(1) -- Wait for UI to fully load
+    
+    local kavoGui = lp.PlayerGui:FindFirstChild("Kavo")
+    if not kavoGui then return end
+    
+    local mainFrame = kavoGui:FindFirstChild("Main")
+    if not mainFrame then return end
+    
+    local topBar = mainFrame:FindFirstChild("TopBar")
+    if not topBar then return end
+    
+    -- Create minimize button
+    local minimizeBtn = Instance.new("TextButton")
+    minimizeBtn.Name = "MinimizeButton"
+    minimizeBtn.Size = UDim2.new(0, 25, 0, 25)
+    minimizeBtn.Position = UDim2.new(1, -55, 0, 5)
+    minimizeBtn.BackgroundColor3 = Color3.fromRGB(74, 99, 135)
+    minimizeBtn.Text = "_"
+    minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    minimizeBtn.TextSize = 16
+    minimizeBtn.Font = Enum.Font.SourceSansBold
+    minimizeBtn.BorderSizePixel = 0
+    minimizeBtn.Parent = topBar
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 4)
+    corner.Parent = minimizeBtn
+    
+    -- Minimize functionality
+    minimizeBtn.MouseButton1Click:Connect(function()
+        mainFrame.Visible = false
+        isMinimized = true
+        createFloatingButton()
+    end)
+    
+    -- Hover effects
+    minimizeBtn.MouseEnter:Connect(function()
+        minimizeBtn.BackgroundColor3 = Color3.fromRGB(94, 119, 155)
+    end)
+    
+    minimizeBtn.MouseLeave:Connect(function()
+        minimizeBtn.BackgroundColor3 = Color3.fromRGB(74, 99, 135)
+    end)
+end
+
 -- Create UI Window
-local Window = library.CreateLib("🎣 Fisch Script", "Ocean")
+Window = library.CreateLib("🎣 Fisch Script", "Ocean")
+
+-- Add minimize button after UI loads
+task.spawn(addMinimizeButton)
 
 -- Create Tabs
 local AutoTab = Window:NewTab("🎣 Automation")
@@ -210,12 +549,44 @@ LocationSection:NewButton("Teleport To Zone", "Teleport to selected zone", funct
         gethrp().CFrame = TeleportLocations['Zones'][flags['zones']]
     end
 end)
-LocationSection:NewDropdown("Rod Locations", "Choose a rod location", RodNames, function(currentOption)
+
+local RodSection = TeleTab:NewSection("Rod Locations")
+RodSection:NewDropdown("Rod Locations", "Choose a rod location", RodNames, function(currentOption)
     flags['rodlocations'] = currentOption
 end)
-LocationSection:NewButton("Teleport To Rod", "Teleport to selected rod location", function()
+RodSection:NewButton("Teleport To Rod", "Teleport to selected rod location", function()
     if flags['rodlocations'] then
         gethrp().CFrame = TeleportLocations['Rods'][flags['rodlocations']]
+    end
+end)
+
+local ItemSection = TeleTab:NewSection("Items & Tools")
+ItemSection:NewDropdown("Select Item", "Choose an item location", ItemNames, function(currentOption)
+    flags['items'] = currentOption
+end)
+ItemSection:NewButton("Teleport To Item", "Teleport to selected item", function()
+    if flags['items'] then
+        gethrp().CFrame = TeleportLocations['Items'][flags['items']]
+    end
+end)
+
+local FishSection = TeleTab:NewSection("Fishing Spots")
+FishSection:NewDropdown("Select Fishing Spot", "Choose a fishing spot", FishingSpotNames, function(currentOption)
+    flags['fishingspots'] = currentOption
+end)
+FishSection:NewButton("Teleport To Fishing Spot", "Teleport to selected fishing spot", function()
+    if flags['fishingspots'] then
+        gethrp().CFrame = TeleportLocations['Fishing Spots'][flags['fishingspots']]
+    end
+end)
+
+local NPCSection = TeleTab:NewSection("NPCs")
+NPCSection:NewDropdown("Select NPC", "Choose an NPC location", NPCNames, function(currentOption)
+    flags['npcs'] = currentOption
+end)
+NPCSection:NewButton("Teleport To NPC", "Teleport to selected NPC", function()
+    if flags['npcs'] then
+        gethrp().CFrame = TeleportLocations['NPCs'][flags['npcs']]
     end
 end)
 
