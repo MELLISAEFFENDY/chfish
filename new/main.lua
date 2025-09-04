@@ -11,6 +11,10 @@ local lp = Players.LocalPlayer
 local fishabundancevisible = false
 local deathcon
 local tooltipmessage
+
+-- Default delay values
+flags['autocastdelay'] = 0.5
+flags['autoreeldelay'] = 0.5
 local TeleportLocations = {
     ['Zones'] = {
         ['Moosewood'] = CFrame.new(379.875458, 134.500519, 233.5495, -0.033920113, 8.13274355e-08, 0.999424577, 8.98441925e-08, 1, -7.83249803e-08, -0.999424577, 8.7135696e-08, -0.033920113),
@@ -507,14 +511,26 @@ end)
 AutoSection:NewDropdown("Freeze Character Mode", "Select freeze mode", {"Rod Equipped", "Toggled"}, function(currentOption)
     flags['freezecharmode'] = currentOption
 end)
-AutoSection:NewToggle("Auto Cast", "Automatically cast fishing rod", function(state)
+
+local CastSection = AutoTab:NewSection("Auto Cast Settings")
+CastSection:NewToggle("Auto Cast", "Automatically cast fishing rod", function(state)
     flags['autocast'] = state
 end)
-AutoSection:NewToggle("Auto Shake", "Automatically shake when fish bites", function(state)
+CastSection:NewSlider("Auto Cast Delay", "Delay between auto casts (seconds)", 0.1, 5, 0.5, function(value)
+    flags['autocastdelay'] = value
+end)
+
+local ShakeSection = AutoTab:NewSection("Auto Shake Settings")
+ShakeSection:NewToggle("Auto Shake", "Automatically shake when fish bites", function(state)
     flags['autoshake'] = state
 end)
-AutoSection:NewToggle("Auto Reel", "Automatically reel in fish", function(state)
+
+local ReelSection = AutoTab:NewSection("Auto Reel Settings") 
+ReelSection:NewToggle("Auto Reel", "Automatically reel in fish", function(state)
     flags['autoreel'] = state
+end)
+ReelSection:NewSlider("Auto Reel Delay", "Delay between auto reels (seconds)", 0.1, 5, 0.5, function(value)
+    flags['autoreeldelay'] = value
 end)
 
 -- Modifications Section
@@ -641,13 +657,13 @@ RunService.Heartbeat:Connect(function()
     end
     if flags['autocast'] then
         local rod = FindRod()
-        if rod ~= nil and rod['values']['lure'].Value <= .001 and task.wait(.5) then
+        if rod ~= nil and rod['values']['lure'].Value <= .001 and task.wait(flags['autocastdelay'] or 0.5) then
             rod.events.cast:FireServer(100, 1)
         end
     end
     if flags['autoreel'] then
         local rod = FindRod()
-        if rod ~= nil and rod['values']['lure'].Value == 100 and task.wait(.5) then
+        if rod ~= nil and rod['values']['lure'].Value == 100 and task.wait(flags['autoreeldelay'] or 0.5) then
             ReplicatedStorage.events.reelfinished:FireServer(100, true)
         end
     end
