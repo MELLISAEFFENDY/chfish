@@ -296,193 +296,56 @@ end)
 
 -- Try to load library with multiple methods
 local success = false
-local loadAttempts = 0
-local maxAttempts = 3
-
--- Function to attempt loading Kavo library
-local function loadKavoLibrary()
-    loadAttempts = loadAttempts + 1
-    print("Attempting to load Kavo library... (Attempt " .. loadAttempts .. "/" .. maxAttempts .. ")")
-    
-    -- Method 1: Load from local file
-    if CheckFunc(loadfile) and CheckFunc(isfile) and isfile('fisch/kavo.lua') then
-        pcall(function()
-            library = loadfile('fisch/kavo.lua')()
-            if library and library.CreateLib then
-                success = true
-                print("Successfully loaded Kavo from local file")
-            end
-        end)
-    end
-    
-    -- Method 2: Download and load from URL
-    if not success then
-        pcall(function()
-            local content = game:HttpGet(kavoUrl)
-            if content and content ~= "" then
-                library = loadstring(content)()
-                if library and library.CreateLib then
-                    success = true
-                    print("Successfully loaded Kavo from URL")
-                    -- Save to local file for future use
-                    if CheckFunc(writefile) then
-                        pcall(function()
-                            writefile('fisch/kavo.lua', content)
-                        end)
-                    end
-                end
-            end
-        end)
-    end
-    
-    -- Method 3: Try alternative URL or cached version
-    if not success and loadAttempts < maxAttempts then
-        task.wait(1) -- Wait before retry
-        return loadKavoLibrary() -- Recursive retry
-    end
-    
-    return success
+if CheckFunc(loadfile) then
+    pcall(function()
+        library = loadfile('fisch/kavo.lua')()
+        success = true
+    end)
 end
 
--- Attempt to load the library
-loadKavoLibrary()
+if not success then
+    pcall(function()
+        library = loadstring(game:HttpGet(kavoUrl))()
+        success = true
+    end)
+end
 
--- Enhanced fallback UI if Kavo fails
-if not success or not library or not library.CreateLib then
-    warn("Failed to load Kavo UI after " .. maxAttempts .. " attempts, using enhanced fallback")
-    
-    -- Create enhanced fallback UI structure
+-- Fallback to simple UI if Kavo fails
+if not success or not library then
+    warn("Failed to load Kavo UI, using fallback")
+    -- Create simple UI structure
     library = {}
     function library.CreateLib(name, theme)
-        print("Using fallback UI: " .. name)
         local lib = {}
-        lib.name = name
-        lib.theme = theme
-        
         function lib:NewTab(name)
-            print("Created fallback tab: " .. name)
             local tab = {}
-            tab.name = name
-            
             function tab:NewSection(name)
-                print("Created fallback section: " .. name)
                 local section = {}
-                section.name = name
-                
                 function section:NewToggle(name, desc, callback)
-                    print("Created fallback toggle: " .. name)
-                    if callback then 
-                        task.spawn(function()
-                            callback(false) -- Default state
-                        end)
-                    end
-                    return {
-                        SetValue = function(self, value)
-                            if callback then callback(value) end
-                        end
-                    }
+                    if callback then callback(false) end
                 end
-                
                 function section:NewDropdown(name, desc, options, callback)
-                    print("Created fallback dropdown: " .. name)
-                    if callback and options and #options > 0 then 
-                        task.spawn(function()
-                            callback(options[1]) -- Default to first option
-                        end)
-                    end
-                    return {
-                        SetValue = function(self, value)
-                            if callback then callback(value) end
-                        end
-                    }
+                    if callback then callback(options[1]) end
                 end
-                
                 function section:NewButton(name, desc, callback)
-                    print("Created fallback button: " .. name)
-                    return {
-                        Fire = function(self)
-                            if callback then callback() end
-                        end
-                    }
+                    -- Button functionality
                 end
-                
-                function section:NewSlider(name, desc, min, max, default, callback)
-                    print("Created fallback slider: " .. name)
-                    if callback then
-                        task.spawn(function()
-                            callback(default or min or 0)
-                        end)
-                    end
-                    return {
-                        SetValue = function(self, value)
-                            if callback then callback(value) end
-                        end
-                    }
-                end
-                
                 return section
             end
             return tab
         end
         return lib
     end
-    
-    -- Create a simple visual indicator for fallback mode
-    task.spawn(function()
-        task.wait(2)
-        if lp and lp.PlayerGui then
-            pcall(function()
-                local gui = Instance.new("ScreenGui")
-                gui.Name = "FallbackIndicator"
-                gui.ResetOnSpawn = false
-                
-                local frame = Instance.new("Frame")
-                frame.Size = UDim2.new(0, 200, 0, 50)
-                frame.Position = UDim2.new(0, 10, 0, 10)
-                frame.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
-                frame.Parent = gui
-                
-                local corner = Instance.new("UICorner")
-                corner.CornerRadius = UDim.new(0, 8)
-                corner.Parent = frame
-                
-                local label = Instance.new("TextLabel")
-                label.Size = UDim2.new(1, 0, 1, 0)
-                label.BackgroundTransparency = 1
-                label.Text = "Fallback UI Active"
-                label.TextColor3 = Color3.fromRGB(255, 255, 255)
-                label.TextScaled = true
-                label.Font = Enum.Font.SourceSansBold
-                label.Parent = frame
-                
-                gui.Parent = lp.PlayerGui
-                
-                -- Auto-remove after 5 seconds
-                task.wait(5)
-                gui:Destroy()
-            end)
-        end
-    end)
-else
-    print("Kavo UI loaded successfully!")
 end
 
 -- Function to create floating button
 local function createFloatingButton()
-    if floatingButton then 
-        pcall(function() floatingButton:Destroy() end)
-        floatingButton = nil
-    end
+    if floatingButton then return end
     
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "FischFloatingButton"
     screenGui.ResetOnSpawn = false
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    
-    -- Protect GUI from deletion
-    if syn and syn.protect_gui then
-        syn.protect_gui(screenGui)
-    end
     
     local frame = Instance.new("Frame")
     frame.Name = "FloatingFrame"
@@ -490,7 +353,6 @@ local function createFloatingButton()
     frame.Position = UDim2.new(1, -80, 0, 20)
     frame.BackgroundColor3 = Color3.fromRGB(45, 65, 95)
     frame.BorderSizePixel = 0
-    frame.ZIndex = 100
     frame.Parent = screenGui
     
     local corner = Instance.new("UICorner")
@@ -506,328 +368,134 @@ local function createFloatingButton()
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
     button.TextSize = 24
     button.Font = Enum.Font.SourceSansBold
-    button.ZIndex = 101
     button.Parent = frame
     
-    -- Gradient with error handling
-    pcall(function()
-        local gradient = Instance.new("UIGradient")
-        gradient.Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(74, 99, 135)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(45, 65, 95))
-        }
-        gradient.Rotation = 45
-        gradient.Parent = frame
-    end)
+    -- Gradient
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(74, 99, 135)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(45, 65, 95))
+    }
+    gradient.Rotation = 45
+    gradient.Parent = frame
     
-    -- Shadow effect with error handling
-    pcall(function()
-        local shadow = Instance.new("Frame")
-        shadow.Name = "Shadow"
-        shadow.Size = UDim2.new(1, 6, 1, 6)
-        shadow.Position = UDim2.new(0, -3, 0, -3)
-        shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        shadow.BackgroundTransparency = 0.7
-        shadow.ZIndex = frame.ZIndex - 1
-        shadow.Parent = frame
-        
-        local shadowCorner = Instance.new("UICorner")
-        shadowCorner.CornerRadius = UDim.new(0, 30)
-        shadowCorner.Parent = shadow
-    end)
+    -- Shadow effect
+    local shadow = Instance.new("Frame")
+    shadow.Name = "Shadow"
+    shadow.Size = UDim2.new(1, 6, 1, 6)
+    shadow.Position = UDim2.new(0, -3, 0, -3)
+    shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    shadow.BackgroundTransparency = 0.7
+    shadow.ZIndex = frame.ZIndex - 1
+    shadow.Parent = frame
     
-    -- Click event with improved error handling
+    local shadowCorner = Instance.new("UICorner")
+    shadowCorner.CornerRadius = UDim.new(0, 30)
+    shadowCorner.Parent = shadow
+    
+    -- Click event
     button.MouseButton1Click:Connect(function()
-        pcall(function()
-            if isMinimized then
-                -- Try to find and show main UI
-                local mainFrame = nil
-                
-                -- Check PlayerGui first
-                for _, gui in pairs(lp.PlayerGui:GetChildren()) do
-                    if gui:IsA("ScreenGui") then
-                        local frame = gui:FindFirstChild("Main")
-                        if frame then
-                            mainFrame = frame
-                            break
-                        end
-                    end
-                end
-                
-                -- Check CoreGui as backup
-                if not mainFrame then
-                    for _, gui in pairs(game.CoreGui:GetChildren()) do
-                        if gui:IsA("ScreenGui") then
-                            local frame = gui:FindFirstChild("Main")
-                            if frame then
-                                mainFrame = frame
-                                break
-                            end
-                        end
-                    end
-                end
-                
-                if mainFrame then
-                    mainFrame.Visible = true
-                    isMinimized = false
-                    screenGui:Destroy()
-                    floatingButton = nil
-                else
-                    warn("Could not find main UI to restore")
-                end
+        if isMinimized then
+            -- Show main UI
+            local mainFrame = lp.PlayerGui:FindFirstChild("Kavo"):FindFirstChild("Main")
+            if mainFrame then
+                mainFrame.Visible = true
+                isMinimized = false
+                screenGui:Destroy()
+                floatingButton = nil
             end
-        end)
+        end
     end)
     
-    -- Dragging functionality with error handling
+    -- Dragging functionality
     local dragging = false
     local dragStart = nil
     local startPos = nil
     
     button.InputBegan:Connect(function(input)
-        pcall(function()
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = true
-                dragStart = input.Position
-                startPos = frame.Position
-            end
-        end)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+        end
     end)
     
     button.InputChanged:Connect(function(input)
-        pcall(function()
-            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                local delta = input.Position - dragStart
-                frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-            end
-        end)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
     end)
     
     button.InputEnded:Connect(function(input)
-        pcall(function()
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = false
-            end
-        end)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
     end)
     
-    -- Add hover effects
-    button.MouseEnter:Connect(function()
-        pcall(function()
-            frame.BackgroundColor3 = Color3.fromRGB(55, 75, 105)
-        end)
-    end)
-    
-    button.MouseLeave:Connect(function()
-        pcall(function()
-            frame.BackgroundColor3 = Color3.fromRGB(45, 65, 95)
-        end)
-    end)
-    
-    -- Try to add to CoreGui first, then PlayerGui as fallback
-    local success = false
-    pcall(function()
+    -- Add to CoreGui or PlayerGui
+    if syn and syn.protect_gui then
+        syn.protect_gui(screenGui)
         screenGui.Parent = game.CoreGui
-        success = true
-    end)
-    
-    if not success then
-        pcall(function()
-            screenGui.Parent = lp.PlayerGui
-        end)
+    else
+        screenGui.Parent = lp.PlayerGui
     end
     
     floatingButton = screenGui
-    print("Floating button created successfully")
 end
 
 -- Function to add minimize button to main UI
 local function addMinimizeButton()
-    task.wait(2) -- Wait longer for UI to fully load
+    task.wait(1) -- Wait for UI to fully load
     
-    -- Try multiple ways to find the main UI frame
-    local mainFrame = nil
-    local attempts = 0
+    local kavoGui = lp.PlayerGui:FindFirstChild("Kavo")
+    if not kavoGui then return end
     
-    while not mainFrame and attempts < 10 do
-        task.wait(0.5)
-        attempts = attempts + 1
-        
-        -- Check for different possible GUI names and structures
-        for _, gui in pairs(lp.PlayerGui:GetChildren()) do
-            if gui:IsA("ScreenGui") then
-                local frame = gui:FindFirstChild("Main")
-                if frame then
-                    mainFrame = frame
-                    break
-                end
-            end
-        end
-        
-        -- Also check CoreGui
-        for _, gui in pairs(game.CoreGui:GetChildren()) do
-            if gui:IsA("ScreenGui") then
-                local frame = gui:FindFirstChild("Main")
-                if frame then
-                    mainFrame = frame
-                    break
-                end
-            end
-        end
-    end
+    local mainFrame = kavoGui:FindFirstChild("Main")
+    if not mainFrame then return end
     
-    if not mainFrame then 
-        warn("Could not find main UI frame for minimize button")
-        return 
-    end
-    
-    -- Find header/top bar (try different possible names)
-    local topBar = mainFrame:FindFirstChild("MainHeader") or 
-                   mainFrame:FindFirstChild("TopBar") or 
-                   mainFrame:FindFirstChild("Header") or
-                   mainFrame:FindFirstChild("TitleBar")
-    
-    if not topBar then 
-        warn("Could not find top bar for minimize button")
-        return 
-    end
-    
-    -- Check if minimize button already exists
-    if topBar:FindFirstChild("MinimizeButton") then
-        return -- Button already exists
-    end
+    local topBar = mainFrame:FindFirstChild("TopBar")
+    if not topBar then return end
     
     -- Create minimize button
     local minimizeBtn = Instance.new("TextButton")
     minimizeBtn.Name = "MinimizeButton"
     minimizeBtn.Size = UDim2.new(0, 25, 0, 25)
-    minimizeBtn.Position = UDim2.new(1, -55, 0, 2)
+    minimizeBtn.Position = UDim2.new(1, -55, 0, 5)
     minimizeBtn.BackgroundColor3 = Color3.fromRGB(74, 99, 135)
-    minimizeBtn.Text = "−" -- Using proper minus symbol
+    minimizeBtn.Text = "_"
     minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    minimizeBtn.TextSize = 18
+    minimizeBtn.TextSize = 16
     minimizeBtn.Font = Enum.Font.SourceSansBold
     minimizeBtn.BorderSizePixel = 0
-    minimizeBtn.ZIndex = 10
     minimizeBtn.Parent = topBar
     
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 4)
     corner.Parent = minimizeBtn
     
-    -- Minimize functionality with error handling
+    -- Minimize functionality
     minimizeBtn.MouseButton1Click:Connect(function()
-        pcall(function()
-            mainFrame.Visible = false
-            isMinimized = true
-            createFloatingButton()
-        end)
+        mainFrame.Visible = false
+        isMinimized = true
+        createFloatingButton()
     end)
     
-    -- Hover effects with error handling
+    -- Hover effects
     minimizeBtn.MouseEnter:Connect(function()
-        pcall(function()
-            minimizeBtn.BackgroundColor3 = Color3.fromRGB(94, 119, 155)
-        end)
+        minimizeBtn.BackgroundColor3 = Color3.fromRGB(94, 119, 155)
     end)
     
     minimizeBtn.MouseLeave:Connect(function()
-        pcall(function()
-            minimizeBtn.BackgroundColor3 = Color3.fromRGB(74, 99, 135)
-        end)
-    end)
-    
-    print("Minimize button added successfully")
-end
-
--- Create UI Window with error handling
-local createUISuccess = false
-pcall(function()
-    Window = library.CreateLib("🎣 Fisch Script", "Ocean")
-    createUISuccess = true
-end)
-
-if not createUISuccess then
-    warn("Failed to create main window, trying alternative method")
-    pcall(function()
-        Window = library.CreateLib("Fisch Script", "DarkTheme")
-        createUISuccess = true
+        minimizeBtn.BackgroundColor3 = Color3.fromRGB(74, 99, 135)
     end)
 end
 
-if not createUISuccess then
-    warn("Could not create UI window at all")
-    return
-end
+-- Create UI Window
+Window = library.CreateLib("🎣 Fisch Script", "Ocean")
 
--- Add keybind to toggle UI visibility
-local UserInputService = game:GetService("UserInputService")
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    
-    if input.KeyCode == Enum.KeyCode.RightControl then -- Right Ctrl to toggle UI
-        pcall(function()
-            if isMinimized then
-                -- Try to restore from floating button
-                if floatingButton then
-                    local button = floatingButton:FindFirstChild("FloatingFrame"):FindFirstChild("MinimizeButton")
-                    if button then
-                        button.MouseButton1Click:Fire()
-                    end
-                end
-            else
-                -- Try to minimize
-                local mainFrame = nil
-                for _, gui in pairs(lp.PlayerGui:GetChildren()) do
-                    if gui:IsA("ScreenGui") then
-                        local frame = gui:FindFirstChild("Main")
-                        if frame then
-                            mainFrame = frame
-                            break
-                        end
-                    end
-                end
-                
-                if not mainFrame then
-                    for _, gui in pairs(game.CoreGui:GetChildren()) do
-                        if gui:IsA("ScreenGui") then
-                            local frame = gui:FindFirstChild("Main")
-                            if frame then
-                                mainFrame = frame
-                                break
-                            end
-                        end
-                    end
-                end
-                
-                if mainFrame then
-                    mainFrame.Visible = false
-                    isMinimized = true
-                    createFloatingButton()
-                end
-            end
-        end)
-    end
-end)
-
--- Add minimize button after UI loads with retry mechanism
-task.spawn(function()
-    local attempts = 0
-    local maxAttempts = 5
-    
-    while attempts < maxAttempts do
-        attempts = attempts + 1
-        task.wait(2)
-        
-        local success = pcall(addMinimizeButton)
-        if success then
-            print("Minimize button added on attempt " .. attempts)
-            break
-        else
-            print("Failed to add minimize button, attempt " .. attempts .. "/" .. maxAttempts)
-        end
-    end
-end)
+-- Add minimize button after UI loads
+task.spawn(addMinimizeButton)
 
 -- Create Tabs
 local AutoTab = Window:NewTab("🎣 Automation")
@@ -848,19 +516,9 @@ local CastSection = AutoTab:NewSection("Auto Cast Settings")
 CastSection:NewToggle("Auto Cast", "Automatically cast fishing rod", function(state)
     flags['autocast'] = state
 end)
-
--- Add slider with error handling
-pcall(function()
-    CastSection:NewSlider("Auto Cast Delay", "Delay between auto casts (seconds)", 0.1, 5, 0.5, function(value)
-        flags['autocastdelay'] = value
-    end)
+CastSection:NewSlider("Auto Cast Delay", "Delay between auto casts (seconds)", 0.1, 5, 0.5, function(value)
+    flags['autocastdelay'] = value
 end)
-
--- Fallback if slider fails
-if not flags['autocastdelay'] then
-    flags['autocastdelay'] = 0.5
-    warn("Auto Cast Delay slider failed, using default value")
-end
 
 local ShakeSection = AutoTab:NewSection("Auto Shake Settings")
 ShakeSection:NewToggle("Auto Shake", "Automatically shake when fish bites", function(state)
@@ -871,19 +529,9 @@ local ReelSection = AutoTab:NewSection("Auto Reel Settings")
 ReelSection:NewToggle("Auto Reel", "Automatically reel in fish", function(state)
     flags['autoreel'] = state
 end)
-
--- Add slider with error handling
-pcall(function()
-    ReelSection:NewSlider("Auto Reel Delay", "Delay between auto reels (seconds)", 0.1, 5, 0.5, function(value)
-        flags['autoreeldelay'] = value
-    end)
+ReelSection:NewSlider("Auto Reel Delay", "Delay between auto reels (seconds)", 0.1, 5, 0.5, function(value)
+    flags['autoreeldelay'] = value
 end)
-
--- Fallback if slider fails
-if not flags['autoreeldelay'] then
-    flags['autoreeldelay'] = 0.5
-    warn("Auto Reel Delay slider failed, using default value")
-end
 
 -- Modifications Section
 if CheckFunc(hookmetamethod) then
