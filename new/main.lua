@@ -283,62 +283,219 @@ local LibName = "FischScript" .. tostring(math.random(1, 100000))
 -- Load Kavo UI from GitHub repository or local file
 local kavoUrl = 'https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/new/Kavo.lua'
 
--- Try to create folder and download library
-pcall(function()
-    if CheckFunc(makefolder) and (CheckFunc(isfolder) and not isfolder('fisch')) then
-        makefolder('fisch')
-    end
-end)
-
-pcall(function()
-    if CheckFunc(writefile) and (CheckFunc(isfile) and not isfile('fisch/kavo.lua')) then
-        writefile('fisch/kavo.lua', game:HttpGet(kavoUrl))
-    end
-end)
-
--- Try to load library with multiple methods
+-- Simple and reliable UI loading
 local success = false
-if CheckFunc(loadfile) then
-    pcall(function()
-        library = loadfile('fisch/kavo.lua')()
-        success = true
-    end)
-end
+library = nil
 
-if not success then
-    pcall(function()
-        library = loadstring(game:HttpGet(kavoUrl))()
+-- Try to load Kavo UI
+pcall(function()
+    library = loadstring(game:HttpGet(kavoUrl))()
+    if library and library.CreateLib then
         success = true
-    end)
-end
+        print("Kavo UI loaded successfully")
+    end
+end)
 
--- Fallback to simple UI if Kavo fails
+-- Simple fallback UI if Kavo fails
 if not success or not library then
-    warn("Failed to load Kavo UI, using fallback")
-    -- Create simple UI structure
+    print("Using fallback UI")
     library = {}
+    
     function library.CreateLib(name, theme)
+        print("Creating fallback UI:", name)
+        
+        -- Create simple GUI
+        local screenGui = Instance.new("ScreenGui")
+        screenGui.Name = LibName
+        screenGui.ResetOnSpawn = false
+        screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        
+        local mainFrame = Instance.new("Frame")
+        mainFrame.Name = "Main"
+        mainFrame.Size = UDim2.new(0, 500, 0, 400)
+        mainFrame.Position = UDim2.new(0.5, -250, 0.5, -200)
+        mainFrame.BackgroundColor3 = Color3.fromRGB(26, 32, 58)
+        mainFrame.BorderSizePixel = 0
+        mainFrame.Parent = screenGui
+        
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 8)
+        corner.Parent = mainFrame
+        
+        -- Header
+        local header = Instance.new("Frame")
+        header.Name = "MainHeader"
+        header.Size = UDim2.new(1, 0, 0, 40)
+        header.BackgroundColor3 = Color3.fromRGB(38, 45, 71)
+        header.BorderSizePixel = 0
+        header.Parent = mainFrame
+        
+        local headerCorner = Instance.new("UICorner")
+        headerCorner.CornerRadius = UDim.new(0, 8)
+        headerCorner.Parent = header
+        
+        local coverFrame = Instance.new("Frame")
+        coverFrame.Size = UDim2.new(1, 0, 0, 20)
+        coverFrame.Position = UDim2.new(0, 0, 1, -20)
+        coverFrame.BackgroundColor3 = Color3.fromRGB(38, 45, 71)
+        coverFrame.BorderSizePixel = 0
+        coverFrame.Parent = header
+        
+        local title = Instance.new("TextLabel")
+        title.Name = "Title"
+        title.Size = UDim2.new(1, -40, 1, 0)
+        title.Position = UDim2.new(0, 10, 0, 0)
+        title.BackgroundTransparency = 1
+        title.Text = name
+        title.TextColor3 = Color3.fromRGB(255, 255, 255)
+        title.TextSize = 16
+        title.Font = Enum.Font.SourceSansBold
+        title.TextXAlignment = Enum.TextXAlignment.Left
+        title.Parent = header
+        
+        -- Close button
+        local closeBtn = Instance.new("TextButton")
+        closeBtn.Name = "CloseButton"
+        closeBtn.Size = UDim2.new(0, 30, 0, 30)
+        closeBtn.Position = UDim2.new(1, -35, 0, 5)
+        closeBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+        closeBtn.Text = "×"
+        closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        closeBtn.TextSize = 20
+        closeBtn.Font = Enum.Font.SourceSansBold
+        closeBtn.BorderSizePixel = 0
+        closeBtn.Parent = header
+        
+        local closeBtnCorner = Instance.new("UICorner")
+        closeBtnCorner.CornerRadius = UDim.new(0, 4)
+        closeBtnCorner.Parent = closeBtn
+        
+        closeBtn.MouseButton1Click:Connect(function()
+            screenGui:Destroy()
+        end)
+        
+        -- Content area
+        local contentFrame = Instance.new("ScrollingFrame")
+        contentFrame.Name = "Content"
+        contentFrame.Size = UDim2.new(1, -20, 1, -60)
+        contentFrame.Position = UDim2.new(0, 10, 0, 50)
+        contentFrame.BackgroundTransparency = 1
+        contentFrame.BorderSizePixel = 0
+        contentFrame.ScrollBarThickness = 6
+        contentFrame.Parent = mainFrame
+        
+        local contentLayout = Instance.new("UIListLayout")
+        contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        contentLayout.Padding = UDim.new(0, 10)
+        contentLayout.Parent = contentFrame
+        
+        -- Add to PlayerGui
+        screenGui.Parent = lp.PlayerGui
+        
+        -- Make draggable
+        local dragging = false
+        local dragInput = nil
+        local dragStart = nil
+        local startPos = nil
+        
+        header.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = true
+                dragStart = input.Position
+                startPos = mainFrame.Position
+            end
+        end)
+        
+        header.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                dragInput = input
+            end
+        end)
+        
+        UserInputService.InputChanged:Connect(function(input)
+            if input == dragInput and dragging then
+                local delta = input.Position - dragStart
+                mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+        end)
+        
+        header.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = false
+            end
+        end)
+        
         local lib = {}
-        function lib:NewTab(name)
+        local tabCount = 0
+        
+        function lib:NewTab(tabName)
+            tabCount = tabCount + 1
+            
+            -- Create tab button
+            local tabBtn = Instance.new("TextButton")
+            tabBtn.Name = "Tab" .. tabCount
+            tabBtn.Size = UDim2.new(1, 0, 0, 35)
+            tabBtn.BackgroundColor3 = Color3.fromRGB(86, 76, 251)
+            tabBtn.Text = tabName or "Tab " .. tabCount
+            tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            tabBtn.TextSize = 14
+            tabBtn.Font = Enum.Font.SourceSansBold
+            tabBtn.BorderSizePixel = 0
+            tabBtn.Parent = contentFrame
+            
+            local tabCorner = Instance.new("UICorner")
+            tabCorner.CornerRadius = UDim.new(0, 6)
+            tabCorner.Parent = tabBtn
+            
+            -- Hover effects
+            tabBtn.MouseEnter:Connect(function()
+                tabBtn.BackgroundColor3 = Color3.fromRGB(106, 96, 255)
+            end)
+            
+            tabBtn.MouseLeave:Connect(function()
+                tabBtn.BackgroundColor3 = Color3.fromRGB(86, 76, 251)
+            end)
+            
             local tab = {}
-            function tab:NewSection(name)
+            local sectionCount = 0
+            
+            function tab:NewSection(sectionName)
+                sectionCount = sectionCount + 1
+                
                 local section = {}
+                local elementCount = 0
+                
                 function section:NewToggle(name, desc, callback)
+                    elementCount = elementCount + 1
                     if callback then callback(false) end
+                    return section
                 end
+                
                 function section:NewDropdown(name, desc, options, callback)
-                    if callback then callback(options[1]) end
+                    elementCount = elementCount + 1
+                    if callback and options and #options > 0 then 
+                        callback(options[1]) 
+                    end
+                    return section
                 end
+                
                 function section:NewButton(name, desc, callback)
-                    -- Button functionality
+                    elementCount = elementCount + 1
+                    return section
                 end
+                
                 function section:NewSlider(name, desc, min, max, default, callback)
-                    if callback then callback(default) end
+                    elementCount = elementCount + 1
+                    if callback then callback(default or min or 0) end
+                    return section
                 end
+                
                 return section
             end
+            
             return tab
         end
+        
         return lib
     end
 end
@@ -487,99 +644,97 @@ end
 -- Function to add minimize button to main UI
 local function addMinimizeButton()
     task.spawn(function()
-        local attempts = 0
-        local maxAttempts = 10
+        task.wait(1) -- Wait for UI to load
         
-        while attempts < maxAttempts do
-            task.wait(1)
-            attempts = attempts + 1
-            
-            -- Try different GUI locations
-            local kavoGui = game.CoreGui:FindFirstChild(LibName) or lp.PlayerGui:FindFirstChild(LibName)
-            
-            if not kavoGui then
-                -- Try finding by different names
-                for _, gui in pairs(game.CoreGui:GetChildren()) do
-                    if gui.Name:find("Fisch") or gui.Name:find("Kavo") then
-                        kavoGui = gui
+        print("Looking for UI to add minimize button...")
+        
+        -- Find the UI
+        local targetGui = nil
+        local targetFrame = nil
+        local targetHeader = nil
+        
+        -- Check PlayerGui first
+        for _, gui in pairs(lp.PlayerGui:GetChildren()) do
+            if gui:IsA("ScreenGui") and (gui.Name == LibName or gui.Name:find("Fisch")) then
+                local main = gui:FindFirstChild("Main")
+                if main then
+                    local header = main:FindFirstChild("MainHeader") or main:FindFirstChild("Header") or main:FindFirstChild("TopBar")
+                    if header then
+                        targetGui = gui
+                        targetFrame = main  
+                        targetHeader = header
                         break
                     end
                 end
-                
-                if not kavoGui then
-                    for _, gui in pairs(lp.PlayerGui:GetChildren()) do
-                        if gui.Name:find("Fisch") or gui.Name:find("Kavo") then
-                            kavoGui = gui
+            end
+        end
+        
+        -- Check CoreGui if not found in PlayerGui
+        if not targetGui then
+            for _, gui in pairs(game.CoreGui:GetChildren()) do
+                if gui:IsA("ScreenGui") and (gui.Name == LibName or gui.Name:find("Fisch") or gui.Name:find("Kavo")) then
+                    local main = gui:FindFirstChild("Main")
+                    if main then
+                        local header = main:FindFirstChild("MainHeader") or main:FindFirstChild("Header") or main:FindFirstChild("TopBar")
+                        if header then
+                            targetGui = gui
+                            targetFrame = main
+                            targetHeader = header
                             break
                         end
                     end
                 end
             end
-            
-            if kavoGui then
-                local mainFrame = kavoGui:FindFirstChild("Main")
-                if mainFrame then
-                    -- Try different header names
-                    local topBar = mainFrame:FindFirstChild("MainHeader") or 
-                                   mainFrame:FindFirstChild("TopBar") or 
-                                   mainFrame:FindFirstChild("Header")
-                    
-                    if topBar then
-                        -- Check if minimize button already exists
-                        if topBar:FindFirstChild("MinimizeButton") then
-                            print("Minimize button already exists")
-                            return
-                        end
-                        
-                        -- Create minimize button
-                        local minimizeBtn = Instance.new("TextButton")
-                        minimizeBtn.Name = "MinimizeButton"
-                        minimizeBtn.Size = UDim2.new(0, 30, 0, 25)
-                        minimizeBtn.Position = UDim2.new(1, -35, 0, 2)
-                        minimizeBtn.BackgroundColor3 = Color3.fromRGB(86, 76, 251)
-                        minimizeBtn.Text = "—"
-                        minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-                        minimizeBtn.TextSize = 18
-                        minimizeBtn.Font = Enum.Font.SourceSansBold
-                        minimizeBtn.BorderSizePixel = 0
-                        minimizeBtn.ZIndex = 100
-                        minimizeBtn.Parent = topBar
-                        
-                        local corner = Instance.new("UICorner")
-                        corner.CornerRadius = UDim.new(0, 4)
-                        corner.Parent = minimizeBtn
-                        
-                        -- Minimize functionality
-                        minimizeBtn.MouseButton1Click:Connect(function()
-                            kavoGui.Enabled = false
-                            isMinimized = true
-                            createFloatingButton()
-                            print("UI minimized")
-                        end)
-                        
-                        -- Hover effects
-                        minimizeBtn.MouseEnter:Connect(function()
-                            minimizeBtn.BackgroundColor3 = Color3.fromRGB(106, 96, 255)
-                        end)
-                        
-                        minimizeBtn.MouseLeave:Connect(function()
-                            minimizeBtn.BackgroundColor3 = Color3.fromRGB(86, 76, 251)
-                        end)
-                        
-                        print("Minimize button created successfully!")
-                        return
-                    else
-                        print("Header not found, attempt " .. attempts)
-                    end
-                else
-                    print("Main frame not found, attempt " .. attempts)
-                end
-            else
-                print("GUI not found, attempt " .. attempts)
-            end
         end
         
-        print("Failed to add minimize button after " .. maxAttempts .. " attempts")
+        if targetGui and targetHeader then
+            print("Found UI, adding minimize button...")
+            
+            -- Check if minimize button already exists
+            if targetHeader:FindFirstChild("MinimizeButton") then
+                print("Minimize button already exists")
+                return
+            end
+            
+            -- Create minimize button
+            local minimizeBtn = Instance.new("TextButton")
+            minimizeBtn.Name = "MinimizeButton"
+            minimizeBtn.Size = UDim2.new(0, 30, 0, 25)
+            minimizeBtn.Position = UDim2.new(1, -35, 0, 7)
+            minimizeBtn.BackgroundColor3 = Color3.fromRGB(86, 76, 251)
+            minimizeBtn.Text = "—"
+            minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            minimizeBtn.TextSize = 16
+            minimizeBtn.Font = Enum.Font.SourceSansBold
+            minimizeBtn.BorderSizePixel = 0
+            minimizeBtn.ZIndex = 100
+            minimizeBtn.Parent = targetHeader
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 4)
+            corner.Parent = minimizeBtn
+            
+            -- Minimize functionality
+            minimizeBtn.MouseButton1Click:Connect(function()
+                targetGui.Enabled = false
+                isMinimized = true
+                createFloatingButton()
+                print("UI minimized successfully")
+            end)
+            
+            -- Hover effects
+            minimizeBtn.MouseEnter:Connect(function()
+                minimizeBtn.BackgroundColor3 = Color3.fromRGB(106, 96, 255)
+            end)
+            
+            minimizeBtn.MouseLeave:Connect(function()
+                minimizeBtn.BackgroundColor3 = Color3.fromRGB(86, 76, 251)
+            end)
+            
+            print("Minimize button added successfully!")
+        else
+            print("Could not find suitable UI to add minimize button")
+        end
     end)
 end
 end
