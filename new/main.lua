@@ -91,27 +91,72 @@ end
 
 --// UI
 local library
--- Load Kavo UI from GitHub repository
+-- Load Kavo UI from GitHub repository or local file
 local kavoUrl = 'https://raw.githubusercontent.com/MELLISAEFFENDY/chfish/main/new/Kavo.lua'
 
-if CheckFunc(makefolder) and (CheckFunc(isfolder) and not isfolder('fisch')) then
-    makefolder('fisch')
-end
-if CheckFunc(writefile) and (CheckFunc(isfile) and not isfile('fisch/kavo.lua')) then
-    writefile('fisch/kavo.lua', game:HttpGet(kavoUrl))
-end
+-- Try to create folder and download library
+pcall(function()
+    if CheckFunc(makefolder) and (CheckFunc(isfolder) and not isfolder('fisch')) then
+        makefolder('fisch')
+    end
+end)
+
+pcall(function()
+    if CheckFunc(writefile) and (CheckFunc(isfile) and not isfile('fisch/kavo.lua')) then
+        writefile('fisch/kavo.lua', game:HttpGet(kavoUrl))
+    end
+end)
+
+-- Try to load library with multiple methods
+local success = false
 if CheckFunc(loadfile) then
-    library = loadfile('fisch/kavo.lua')()
-else
-    library = loadstring(game:HttpGet(kavoUrl))()
+    pcall(function()
+        library = loadfile('fisch/kavo.lua')()
+        success = true
+    end)
 end
 
--- Create Kavo UI Window
+if not success then
+    pcall(function()
+        library = loadstring(game:HttpGet(kavoUrl))()
+        success = true
+    end)
+end
+
+-- Fallback to simple UI if Kavo fails
+if not success or not library then
+    warn("Failed to load Kavo UI, using fallback")
+    -- Create simple UI structure
+    library = {}
+    function library.CreateLib(name, theme)
+        local lib = {}
+        function lib:NewTab(name)
+            local tab = {}
+            function tab:NewSection(name)
+                local section = {}
+                function section:NewToggle(name, desc, callback)
+                    if callback then callback(false) end
+                end
+                function section:NewDropdown(name, desc, options, callback)
+                    if callback then callback(options[1]) end
+                end
+                function section:NewButton(name, desc, callback)
+                    -- Button functionality
+                end
+                return section
+            end
+            return tab
+        end
+        return lib
+    end
+end
+
+-- Create UI Window
 local Window = library.CreateLib("🎣 Fisch Script", "Ocean")
 
 -- Create Tabs
 local AutoTab = Window:NewTab("🎣 Automation")
-local ModTab = Window:NewTab("⚙️ Modifications")
+local ModTab = Window:NewTab("⚙️ Modifications") 
 local TeleTab = Window:NewTab("🌍 Teleports")
 local VisualTab = Window:NewTab("👁️ Visuals")
 
